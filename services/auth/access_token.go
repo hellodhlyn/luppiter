@@ -18,6 +18,10 @@ type AccessToken struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+func (AccessToken) TableName() string {
+	return "auth_access_tokens"
+}
+
 func (token *AccessToken) IsExpired() bool {
 	return time.Now().After(token.AccessTokenValidUntil)
 }

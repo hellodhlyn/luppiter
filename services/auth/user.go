@@ -32,6 +32,10 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+func (User) TableName() string {
+	return "auth_users"
+}
+
 func (user *User) ValidatePassword(password string) bool {
 	hash := argon2.IDKey([]byte(password), user.PasswordSalt, 1, 8*1024, 4, 32)
 	return bytes.Compare(hash, user.PasswordHash) == 0

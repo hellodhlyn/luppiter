@@ -1,7 +1,7 @@
 # LYnLab Luppiter GraphQL
 
-> GraphQL APIs for LYnLab Luppiter services.
-> For further information, see documentations on [LYnLab Luppiter console](https://luppiter.lynlab.co.kr).
+> GraphQL APIs for LYnLab Luppiter services.  
+> For further information, see documentations on [LYnLab Luppiter console](https://luppiter.lynlab.co.kr/web).
 
 ## Development
 
