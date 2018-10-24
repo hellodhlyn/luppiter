@@ -8,7 +8,6 @@ import (
 func init() {
 	database.DB.AutoMigrate(
 		&auth.APIKey{},
-		&AccessToken{},
 		&User{},
 	)
 }

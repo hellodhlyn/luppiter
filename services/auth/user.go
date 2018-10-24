@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/graphql-go/graphql"
@@ -82,44 +81,48 @@ var CreateUserMutation = &graphql.Field{
 				Name:        "UserInput",
 				Description: "InputObject for creating new user",
 				Fields: graphql.InputObjectConfigFieldMap{
-					"username":       &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
-					"password":       &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
-					"email":          &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
-					"redirectionUrl": &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
+					"username": &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
+					"password": &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
+					"email":    &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
 				},
 			})),
 		},
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 		userInput := params.Args["UserInput"].(map[string]interface{})
-
 		username := userInput["username"].(string)
 		password := userInput["password"].(string)
 		email := userInput["email"].(string)
-		redirectionURL := userInput["redirectionUrl"].(string)
 
-		return register(username, password, email, redirectionURL)
+		return register(username, password, email)
 	},
 }
 
-// Activate given account.
-// Because of HTTP redirection, this API doesn't use GraphQL interface.
-func Activate(activationToken string) error {
-	user := new(User)
-	errs := database.DB.Where(&User{ActivationToken: activationToken}).First(&user).GetErrors()
-	if len(errs) > 0 || user.UUID == "" || time.Now().After(user.ActivationTokenValidUntil) {
-		return fmt.Errorf("invalid activation token")
-	}
+var ActivateUserMutation = &graphql.Field{
+	Type:        userType,
+	Description: "[Auth] Activation user account.",
+	Args: graphql.FieldConfigArgument{
+		"activationToken": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+	},
+	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+		activationToken := params.Args["activationToken"].(string)
 
-	// Activate the user.
-	user.Activated = true
-	user.ActivationTokenValidUntil = time.Now()
-	database.DB.Save(&user)
+		user := new(User)
+		errs := database.DB.Where(&User{ActivationToken: activationToken}).First(&user).GetErrors()
+		if len(errs) > 0 || user.UUID == "" || time.Now().After(user.ActivationTokenValidUntil) {
+			return nil, fmt.Errorf("invalid activation token")
+		}
 
-	return nil
+		// Activate the user.
+		user.Activated = true
+		user.ActivationTokenValidUntil = time.Now()
+		database.DB.Save(&user)
+
+		return user, nil
+	},
 }
 
-func register(username string, password string, email string, redirectionURL string) (user *User, err error) {
+func register(username string, password string, email string) (user *User, err error) {
 	// Create user model.
 	salt := make([]byte, 32)
 	rand.Read(salt)
@@ -146,11 +149,11 @@ func register(username string, password string, email string, redirectionURL str
 	}
 
 	// Send activation email.
-	return user, sendActivationEmail(email, activationToken, redirectionURL)
+	return user, sendActivationEmail(email, activationToken)
 }
 
-func sendActivationEmail(to string, activationToken string, redirectionURL string) error {
-	activationURL := os.Getenv("LUPPITER_HOST") + "/graphql/api/activate_user?redirection_url=" + redirectionURL + "&activation_token=" + activationToken
+func sendActivationEmail(to string, activationToken string) error {
+	activationURL := "https://luppiter.lynlab.co.kr/web/activate?activation_token=" + activationToken
 	return email.Send(
 		to,
 		"LYnLab Luppiter 계정 활성화 안내",
@@ -163,6 +166,6 @@ func sendActivationEmail(to string, activationToken string, redirectionURL strin
 		<p>만약 본인이 가입하지 않았다면 이 메일을 무시하셔도 됩니다.</p>
 
 		<p>===============<br/>LYnLab Luppiter<br/>https://luppiter.lynlab.co.kr/web<br/>===============</p>
-		`, activationURL, activationURL, activationURL),
+		`, activationURL),
 	)
 }

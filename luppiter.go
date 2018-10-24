@@ -29,6 +29,7 @@ func main() {
 			Name: "RootMutation",
 			Fields: graphql.Fields{
 				// Auth mutations.
+				"activateUser":	              auth.ActivateUserMutation,
 				"createUser":                 auth.CreateUserMutation,
 				"createAccessToken":          auth.CreateAccessTokenMutation,
 				"createAPIKey":               auth.CreateAPIKeyMutation,
@@ -75,20 +76,6 @@ func main() {
 
 		h.ContextHandler(ctx, w, r)
 	}))
-
-	// Set HTTP API endpoints.
-	http.HandleFunc("/api/activate_user", func(w http.ResponseWriter, r *http.Request) {
-		activationToken := r.URL.Query().Get("activation_token")
-		redirectionURL := r.URL.Query().Get("redirection_url")
-
-		err := auth.Activate(activationToken)
-		if err != nil {
-			w.Write([]byte("유효하지 않은 토큰입니다."))
-		} else {
-			w.Header().Set("Location", redirectionURL)
-			w.WriteHeader(http.StatusTemporaryRedirect)
-		}
-	})
 
 	http.ListenAndServe(":8081", nil)
 }
