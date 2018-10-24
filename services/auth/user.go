@@ -28,8 +28,8 @@ type User struct {
 	ActivationToken           string `gorm:"type:varchar(255);INDEX"`
 	ActivationTokenValidUntil time.Time
 
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (User) TableName() string {
@@ -44,10 +44,10 @@ func (user *User) ValidatePassword(password string) bool {
 var userType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "User",
 	Fields: graphql.Fields{
-		"uuid":       &graphql.Field{Type: graphql.String},
-		"username":   &graphql.Field{Type: graphql.String},
-		"email":      &graphql.Field{Type: graphql.String},
-		"created_at": &graphql.Field{Type: graphql.DateTime},
+		"uuid":      &graphql.Field{Type: graphql.String},
+		"username":  &graphql.Field{Type: graphql.String},
+		"email":     &graphql.Field{Type: graphql.String},
+		"createdAt": &graphql.Field{Type: graphql.DateTime},
 	},
 })
 
@@ -73,26 +73,30 @@ var MeQuery = &graphql.Field{
 	},
 }
 
-// CreateUserMutation =>
-//   mutation {
-//     createUser(username: "", password: "", email: "", redirection_url: "") {
-//       uuid, username, email, created_at
-//     }
-//   }
 var CreateUserMutation = &graphql.Field{
 	Type:        userType,
 	Description: "[Auth] Create new user.",
 	Args: graphql.FieldConfigArgument{
-		"username":        &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
-		"password":        &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
-		"email":           &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
-		"redirection_url": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
+		"UserInput": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.NewInputObject(graphql.InputObjectConfig{
+				Name:        "UserInput",
+				Description: "InputObject for creating new user",
+				Fields: graphql.InputObjectConfigFieldMap{
+					"username":       &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
+					"password":       &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
+					"email":          &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
+					"redirectionUrl": &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
+				},
+			})),
+		},
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		username, _ := params.Args["username"].(string)
-		password, _ := params.Args["password"].(string)
-		email, _ := params.Args["email"].(string)
-		redirectionURL, _ := params.Args["redirection_url"].(string)
+		userInput := params.Args["UserInput"].(map[string]interface{})
+
+		username := userInput["username"].(string)
+		password := userInput["password"].(string)
+		email := userInput["email"].(string)
+		redirectionURL := userInput["redirectionUrl"].(string)
 
 		return register(username, password, email, redirectionURL)
 	},
@@ -146,7 +150,7 @@ func register(username string, password string, email string, redirectionURL str
 }
 
 func sendActivationEmail(to string, activationToken string, redirectionURL string) error {
-	activationURL := os.Getenv("LUPPITER_HOST") + "/api/activate_user?redirection_url=" + redirectionURL + "&activation_token=" + activationToken
+	activationURL := os.Getenv("LUPPITER_HOST") + "/graphql/api/activate_user?redirection_url=" + redirectionURL + "&activation_token=" + activationToken
 	return email.Send(
 		to,
 		"LYnLab Luppiter 계정 활성화 안내",
@@ -156,12 +160,9 @@ func sendActivationEmail(to string, activationToken string, redirectionURL strin
 		<p>LYnLab Luppiter 계정 활성화를 위한 인증 이메일입니다.<br/>
 		<a href="%s">여기</a>를 눌러 인증 절차를 진행해주세요.</p>
 
-		<p>만약 링크가 눌러지지 않는다면 직접 브라우저의 주소창에 복사하여 진행해주세요.<br/>
-		<a href="%s">%s</a><br/></p>
-		
 		<p>만약 본인이 가입하지 않았다면 이 메일을 무시하셔도 됩니다.</p>
 
-		<p>===============<br/>LYnLab Luppiter<br/>===============</p>
+		<p>===============<br/>LYnLab Luppiter<br/>https://luppiter.lynlab.co.kr/web<br/>===============</p>
 		`, activationURL, activationURL, activationURL),
 	)
 }

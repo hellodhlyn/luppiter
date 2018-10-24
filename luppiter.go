@@ -42,7 +42,10 @@ func main() {
 	})
 
 	// Set GraphQL endpoint.
-	h := handler.New(&handler.Config{ Schema: &schema })
+	h := handler.New(&handler.Config{ 
+		Schema: &schema,
+		Playground: true,
+	})
 
 	http.Handle("/graphql", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Some CORS configurations.
@@ -54,9 +57,9 @@ func main() {
 		ctx := context.Background()
 		authorizationHeader := r.Header.Get("Authorization")
 		if len(authorizationHeader) > 0 {
-			token := auth.ValidateAccessToken(strings.Split(authorizationHeader, " ")[1])
-			if token != nil {
-				ctx = context.WithValue(ctx, "UserUUID", token.UserUUID)
+			ok, uuid := auth.ValidateAccessTokenAndGetUserUUID(strings.Split(authorizationHeader, " ")[1])
+			if ok {
+				ctx = context.WithValue(ctx, "UserUUID", uuid)
 			}
 		}
 

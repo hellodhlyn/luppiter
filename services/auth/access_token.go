@@ -3,34 +3,29 @@ package auth
 import (
 	"fmt"
 	"luppiter/components/database"
-	"luppiter/components/random"
+	"os"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/graphql-go/graphql"
 )
 
+var hmacSecret []byte
+
 type AccessToken struct {
-	AccessToken           string    `gorm:"type:varchar(255);PRIMARY_KEY" json:"token"`
-	AccessTokenValidUntil time.Time `json:"valid_until"`
-	UserUUID              string    `gorm:"type:varchar(40);NOT NULL"`
-
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Token string `json:"token"`
 }
 
-func (AccessToken) TableName() string {
-	return "auth_access_tokens"
-}
+type AuthClaims struct {
+	UserUUID string `json:"user_uuid"`
 
-func (token *AccessToken) IsExpired() bool {
-	return time.Now().After(token.AccessTokenValidUntil)
+	jwt.StandardClaims
 }
 
 var accessTokenType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "AccessToken",
 	Fields: graphql.Fields{
-		"token":       &graphql.Field{Type: graphql.NewNonNull(graphql.String)},
-		"valid_until": &graphql.Field{Type: graphql.NewNonNull(graphql.DateTime)},
+		"token": &graphql.Field{Type: graphql.NewNonNull(graphql.String)},
 	},
 })
 
@@ -38,45 +33,60 @@ var CreateAccessTokenMutation = &graphql.Field{
 	Type:        accessTokenType,
 	Description: "[Auth] Get access token for specific user.",
 	Args: graphql.FieldConfigArgument{
-		"username": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
-		"password": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.DateTime)},
+		"LoginInput": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.NewInputObject(graphql.InputObjectConfig{
+				Name:        "LoginInput",
+				Description: "Input object for login",
+				Fields: graphql.InputObjectConfigFieldMap{
+					"username": &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
+					"password": &graphql.InputObjectFieldConfig{Type: graphql.NewNonNull(graphql.String)},
+				},
+			})),
+		},
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-		username, _ := params.Args["username"].(string)
-		password, _ := params.Args["password"].(string)
+		loginInput, _ := params.Args["LoginInput"].(map[string]interface{})
 
 		// Check username and password.
 		user := new(User)
-		database.DB.Where(&User{Username: username}).First(&user)
-		if user.UUID == "" || !user.ValidatePassword(password) {
+		database.DB.Where(&User{Username: loginInput["username"].(string)}).First(&user)
+		if user.UUID == "" || !user.ValidatePassword(loginInput["password"].(string)) {
 			return nil, fmt.Errorf("invalid username of password")
 		}
 
-		// If there isn't existing access token or alreay expired, generate new
-		// access token.
-		token := new(AccessToken)
-		database.DB.Where(AccessToken{UserUUID: user.UUID}).First(&token)
-		if token.AccessToken == "" || token.IsExpired() {
-			token.UserUUID = user.UUID
-			token.AccessToken = random.GenerateRandomString(40)
-			token.AccessTokenValidUntil = time.Now().AddDate(0, 0, 7)
-
-			errs := database.DB.Save(&token).GetErrors()
-			if len(errs) > 0 {
-				return nil, fmt.Errorf("an error occurred during issue token")
-			}
+		// Issue new access token.
+		claim := AuthClaims{
+			user.UUID,
+			jwt.StandardClaims{
+				Issuer:    "LYnLab/Luppiter",
+				IssuedAt:  time.Now().Unix(),
+				ExpiresAt: time.Now().AddDate(0, 0, 7).Unix(),
+			},
 		}
 
-		return token, nil
+		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claim).SignedString(hmacSecret)
+		return AccessToken{Token: token}, err
 	},
 }
 
-func ValidateAccessToken(accessToken string) *AccessToken {
-	token := new(AccessToken)
-	database.DB.Where(AccessToken{AccessToken: accessToken}).First(&token)
-
-	if token.UserUUID == "" || time.Now().After(token.AccessTokenValidUntil) {
-		return nil
+// returns (bool, string)
+//   bool   : true if access token is valid.
+//   string : uuid of user.
+func ValidateAccessTokenAndGetUserUUID(tokenString string) (bool, string) {
+	token, err := jwt.ParseWithClaims(tokenString, &AuthClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return hmacSecret, nil
+	})
+	if err != nil {
+		return false, ""
 	}
-	return token
+
+	if claims, ok := token.Claims.(*AuthClaims); ok && token.Valid {
+		return true, claims.UserUUID
+	} else {
+		return false, ""
+	}
+}
+
+func init() {
+	hmacSecret = []byte(os.Getenv("LUPPITER_SECRET_KEY"))
 }
