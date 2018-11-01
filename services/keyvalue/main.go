@@ -57,7 +57,7 @@ var SetKeyValueItemMutation = &graphql.Field{
 			// If key already exists, update it.
 			errs = database.DB.Model(&item).Update(&KeyValueItem{Value: value}).GetErrors()
 		} else {
-			// If not exists, create it.
+			// If xnot exists, create it.
 			item.Value = value
 			errs = database.DB.Create(&item).GetErrors()
 		}
