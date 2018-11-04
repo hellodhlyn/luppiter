@@ -3,6 +3,13 @@
 > GraphQL APIs for LYnLab Luppiter services.  
 > For further information, see documentations on [LYnLab Luppiter console](https://luppiter.lynlab.co.kr/web).
 
+## Specifications
+
+### URL Paths
+
+  - `/apis/graphql` : GET or POST requests for GraphQL APIs.
+  - `/files/{bucketName}/{fileName}` : GET, POST or DELETE for file access. See [storage service](https://luppiter.lynlab.co.kr/web/services/storage) for more information.
+
 ## Development
 
 ### Prerequisites
