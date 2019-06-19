@@ -2,20 +2,15 @@ import {
   BaseEntity, Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn,
 } from "typeorm";
 
-import { ApiKey } from "./api_key";
-
-@Entity({ name: "members" })
-export class Member extends BaseEntity {
+@Entity({ name: "permissions" })
+export class Permission extends BaseEntity {
 
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @Column({ name: "uuid" })
+  @Column({ name: "key" })
   @Index({ unique: true })
-  public uuid: string;
-
-  @OneToMany((type) => ApiKey, (key) => key.member)
-  public apiKeys: ApiKey[];
+  public key: string;
 
   @CreateDateColumn({ name: "created_at" })
   public createdAt: Date;

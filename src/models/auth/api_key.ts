@@ -1,8 +1,10 @@
 import {
-  BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn,
+  BaseEntity, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from "typeorm";
 
 import { Member } from "./member";
+import { Permission } from "./permission";
 
 @Entity({ name: "api_keys" })
 export class ApiKey extends BaseEntity {
@@ -16,8 +18,9 @@ export class ApiKey extends BaseEntity {
   @Column({ name: "memo" })
   public memo: string;
 
-  @Column({ name: "permissions", array: true })
-  public permission: string[];
+  @ManyToMany((type) => Permission)
+  @JoinTable()
+  public permissions: Permission[];
 
   @ManyToOne((type) => Member, (photo) => photo.apiKeys)
   public member: Member;

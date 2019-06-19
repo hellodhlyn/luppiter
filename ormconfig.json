@@ -1,13 +1,13 @@
 {
+  "name": "default",
   "type": "postgres",
   "host": "127.0.0.1",
   "port": "5432",
   "username": "postgres",
   "password": "<set env TYPEORM_PASSWORD>",
   "database": "luppiter",
-  "migrations": [
-    "src/migration/*.ts"
-  ],
+  "entities": ["src/models/**/*.ts"],
+  "migrations": ["src/migration/*.ts"],
   "cli": {
     "migrationsDir": "src/migration"
   }

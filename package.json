@@ -9,11 +9,12 @@
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
     "prestart": "npm run build",
-    "start": "node .",
+    "start": "ts-node .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "typeorm": "ts-node ./node_modules/typeorm/cli.js"
   },
   "dependencies": {
+    "axios": "^0.19.0",
     "express": "^4.17.1",
     "pg": "^7.11.0",
     "typeorm": "^0.2.18"

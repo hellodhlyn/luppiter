@@ -6,29 +6,29 @@ export class CreateAuthStuffs1560870757133 implements MigrationInterface {
     await queryRunner.createTable(new Table({
       name: "members",
       columns: [
-        { name: "id", type: "bigint", isPrimary: true },
-        { name: "member_uuid", type: "varchar", length: "36" },
-        { name: "created_at", type: "timestamp with time zone" },
-        { name: "updated_at", type: "timestamp with time zone" },
+        { name: "id", type: "bigint", isPrimary: true, isGenerated: true },
+        { name: "uuid", type: "varchar", length: "36" },
+        { name: "created_at", type: "timestamp with time zone", default: "now()" },
+        { name: "updated_at", type: "timestamp with time zone", default: "now()" },
       ],
     }));
 
     await queryRunner.createIndex("members", new TableIndex({
-      name: "idx_member_uuid",
-      columnNames: ["member_uuid"],
+      name: "idx_uuid",
+      columnNames: ["uuid"],
       isUnique: true,
     }));
 
     await queryRunner.createTable(new Table({
       name: "api_keys",
       columns: [
-        { name: "id", type: "bigint", isPrimary: true },
+        { name: "id", type: "bigint", isPrimary: true, isGenerated: true },
         { name: "key", type: "varchar", length: "50" },
         { name: "memo", type: "varchar", length: "50" },
         { name: "permissions", type: "varchar", length: "50", isArray: true },
         { name: "member_id", type: "bigint" },
-        { name: "created_at", type: "timestamp with time zone" },
-        { name: "updated_at", type: "timestamp with time zone" },
+        { name: "created_at", type: "timestamp with time zone", default: "now()" },
+        { name: "updated_at", type: "timestamp with time zone", default: "now()" },
       ],
     }));
 
