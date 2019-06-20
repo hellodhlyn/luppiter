@@ -1,5 +1,6 @@
 import {
-  BaseEntity, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn,
+  BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 
@@ -19,10 +20,11 @@ export class ApiKey extends BaseEntity {
   public memo: string;
 
   @ManyToMany((type) => Permission)
-  @JoinTable()
+  @JoinTable({ name: "api_key_permission_relations", joinColumn: { name: "api_key_id" } })
   public permissions: Permission[];
 
   @ManyToOne((type) => Member, (photo) => photo.apiKeys)
+  @JoinColumn({ name: "member_id" })
   public member: Member;
 
   @CreateDateColumn({ name: "created_at" })
@@ -30,5 +32,14 @@ export class ApiKey extends BaseEntity {
 
   @UpdateDateColumn({ name: "updated_at" })
   public updatedAt: Date;
+
+  public toJson(): object {
+    return {
+      key: this.key,
+      memo: this.memo,
+      permissions: (this.permissions || []).map((p) => p.toJson()),
+      createdAt: this.createdAt.toISOString(),
+    };
+  }
 
 }

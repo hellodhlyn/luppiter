@@ -1,5 +1,5 @@
 import {
-  BaseEntity, Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn,
+  BaseEntity, Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn,
 } from "typeorm";
 
 @Entity({ name: "permissions" })
@@ -17,5 +17,9 @@ export class Permission extends BaseEntity {
 
   @UpdateDateColumn({ name: "updated_at" })
   public updatedAt: Date;
+
+  public toJson(): object {
+    return { key: this.key };
+  }
 
 }
