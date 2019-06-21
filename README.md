@@ -1,27 +1,33 @@
-# LYnLab Luppiter GraphQL
+# LYnLab Luppiter
 
-> GraphQL APIs for LYnLab Luppiter services.  
+> Restful APIs for LYnLab Luppiter services.  
 > For further information, see documentations on [LYnLab Luppiter console](https://luppiter.lynlab.co.kr/web).
-
-## Specifications
-
-### URL Paths
-
-  - `/apis/graphql` : GET or POST requests for GraphQL APIs.
-  - `/files/{bucketName}/{fileName}` : GET, POST or DELETE for file access. See [storage service](https://luppiter.lynlab.co.kr/web/services/storage) for more information.
 
 ## Development
 
-### Prerequisites
+### Prerequisited
 
-  - Go 1.11
-  - PostgreSQL
+- nodejs
+- yarn (recommended)
+- docker-compose
 
-### Environment Variables
+### Start Database
 
 ```sh
-cp .envrc.example .envrc
-vi .envrc
+# Start database
+(cd ./compose/local; docker-compose up -d)
+
+# Set environments
+cp .env.example .env
+vi .env  # set your own configurations
+
+# Run migration
+yarn
+yarn typeorm run:migration
 ```
 
-See `.envrc.example` for list of variables. You can use [direnv](http://direnv.net) to set these values.
+### Run Server
+
+```sh
+yarn start
+```

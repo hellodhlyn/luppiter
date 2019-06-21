@@ -1,0 +1,9 @@
+version: '3'
+services:
+  luppiter-db:
+    image: postgres:9.6
+    container_name: luppiter-db
+    environment:
+      POSTGRES_PASSWORD: rootpass
+    ports:
+      - 5432:5432
