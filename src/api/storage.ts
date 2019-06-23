@@ -1,20 +1,36 @@
 import { Request, Response } from "express";
 import { UploadedFile } from "express-fileupload";
+import fileType from "file-type";
+import fs from "fs";
 
 import StorageService from "../services/storage";
 
 const service = new StorageService();
+const cachePath = process.env.LUPPITER_STORAGE_CACHE_PATH || "/tmp";
 
 async function readFile(req: Request, res: Response) {
-  let result;
-  try {
-    result = await service.read(req.params.namespace, req.params.key);
-  } catch (e) {
-    res.sendStatus((e.code === "NoSuchKey") ? 404 : 500);
-    return;
+  const { namespace, key } = req.params;
+  const cacheFile = `${cachePath}/${namespace}/${key}`;
+
+  let fileBody: Buffer;
+  if (!fs.existsSync(cacheFile)) {
+    try {
+      const result = await service.read(req.params.namespace, req.params.key);
+      fileBody = result.Body as Buffer;
+    } catch (e) {
+      res.sendStatus((e.code === "NoSuchKey") ? 404 : 500);
+      return;
+    }
+
+    if (!fs.existsSync(`${cachePath}/${namespace}`)) {
+      fs.mkdirSync(`${cachePath}/${namespace}`, { recursive: true, mode: 0o700 });
+    }
+    fs.writeFileSync(cacheFile, fileBody, { mode: 0o600 });
+  } else {
+    fileBody = fs.readFileSync(cacheFile);
   }
 
-  res.header("Content-Type", result.ContentType).send(result.Body);
+  res.header("Content-Type", fileType(fileBody).mime).send(fileBody);
 }
 
 async function writeFile(req: Request, res: Response) {

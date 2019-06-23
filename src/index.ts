@@ -1,3 +1,8 @@
+// Load environment variables from .env file.
+import dotenv from "dotenv";
+
+dotenv.config();
+
 import express from "express";
 import expressFileupload from "express-fileupload";
 import { createConnection } from "typeorm";
@@ -5,8 +10,10 @@ import { createConnection } from "typeorm";
 import storage from "./api/storage";
 import vulcanAuth from "./api/v1/auth";
 
+// Establish database connection.
 createConnection();
 
+// Start web server.
 const port = process.env.PORT || 8080;
 const app = express();
 
