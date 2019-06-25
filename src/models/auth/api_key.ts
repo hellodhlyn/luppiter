@@ -1,7 +1,6 @@
 import {
   BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  PrimaryGeneratedColumn, UpdateDateColumn,
 } from "typeorm";
 
 import { Member } from "./member";
@@ -32,6 +31,29 @@ export class ApiKey extends BaseEntity {
 
   @UpdateDateColumn({ name: "updated_at" })
   public updatedAt: Date;
+
+  public hasPermission(target: string): boolean {
+    const targetNs = target.split('::');
+    for (let i = 0; i < this.permissions.length; i += 1) {
+      const permission = this.permissions[i].key;
+      if (permission === target) {
+        return true;
+      }
+
+      const permissionNs = permission.split("::");
+      for (let j = 0; j < Math.min(targetNs.length, permissionNs.length); j += 1) {
+        if (permissionNs[j] === "*") {
+          return true;
+        }
+
+        if (targetNs[j] !== permissionNs[j]) {
+          break;
+        }
+      }
+    }
+    
+    return false;
+  }
 
   public toJson(): object {
     return {
