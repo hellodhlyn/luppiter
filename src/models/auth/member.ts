@@ -14,7 +14,7 @@ export class Member extends BaseEntity {
   @Index({ unique: true })
   public uuid: string;
 
-  @OneToMany((type) => ApiKey, (key) => key.member)
+  @OneToMany(() => ApiKey, (key) => key.member)
   public apiKeys: ApiKey[];
 
   @CreateDateColumn({ name: "created_at" })

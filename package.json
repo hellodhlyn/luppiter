@@ -8,10 +8,10 @@
   "scripts": {
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
-    "prestart": "npm run build",
+    "prestart": "yarn build",
     "start": "node .",
     "test": "mocha -r ts-node/register test/**/*.ts",
-    "typeorm": "node ./node_modules/typeorm/cli.js"
+    "typeorm": "yarn build; node ./node_modules/typeorm/cli.js"
   },
   "dependencies": {
     "@types/dotenv": "^6.1.1",

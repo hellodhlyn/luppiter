@@ -26,6 +26,9 @@ app.use(expressFileupload({
 app.get("/vulcan/auth/me", vulcanAuth.getMe);
 app.get("/vulcan/auth/api_keys", vulcanAuth.listApiKeys);
 app.post("/vulcan/auth/api_keys", vulcanAuth.createApiKey);
+app.get("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.listPermissions);
+app.post("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.addPermission);
+app.delete("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.removePermission);
 
 // File Storage
 app.get("/storage/:namespace/:key", storage.readFile);
