@@ -3,6 +3,7 @@ import { UploadedFile } from "express-fileupload";
 import fileType from "file-type";
 import fs from "fs";
 
+import { StorageBucket } from "../models/storage/bucket";
 import StorageService from "../services/storage";
 
 const service = new StorageService();
@@ -11,6 +12,12 @@ const cachePath = process.env.LUPPITER_STORAGE_CACHE_PATH || "/tmp";
 async function readFile(req: Request, res: Response) {
   const { namespace, key } = req.params;
   const cacheFile = `${cachePath}/${namespace}/${key}`;
+
+  const bucket = await StorageBucket.findOne({ name: namespace });
+  if (!bucket || (!bucket.isPublic && bucket.member)) {
+    res.sendStatus(401);
+    return;
+  }
 
   let fileBody: Buffer;
   if (!fs.existsSync(cacheFile)) {
