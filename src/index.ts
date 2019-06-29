@@ -26,10 +26,14 @@ app.use(expressFileupload({
   limits: { fileSize: 10 * 1024 * 1024 },
 }));
 
-function permitted(handle: RequestHandler, permission: string): RequestHandler {
+function permitted(handle: RequestHandler, permission: string, optional: boolean = false): RequestHandler {
   return async (req, res, next) => {
     const key = req.header("X-Api-Key");
     if (!key) {
+      if (optional) {
+        return handle(req, res, next);
+      }
+
       res.sendStatus(401);
       return;
     }
@@ -59,8 +63,8 @@ app.put("/vulcan/storage/buckets/:name", permitted(vulcanStorage.updateBucket, "
 app.delete("/vulcan/storage/buckets/:name", permitted(vulcanStorage.deleteBucket, "Storage::Write"));
 
 // File Storage
-app.get("/storage/:namespace/:key", storage.readFile);
-app.post("/storage/:namespace/:key", storage.writeFile);
+app.get("/storage/:namespace/:key", permitted(storage.readFile, "Storage::Read", true));
+app.post("/storage/:namespace/:key", permitted(storage.writeFile, "Storage::Write", true));
 
 app.get("/ping", (req, res) => res.send("pong"));
 app.listen(port, () => {

@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import { UploadedFile } from "express-fileupload";
+import expressContext from "express-http-context";
 import fileType from "file-type";
 import fs from "fs";
 
+import { ApiKey } from "../models/auth/api_key";
 import { StorageBucket } from "../models/storage/bucket";
 import StorageService from "../services/storage";
 
@@ -13,8 +15,9 @@ async function readFile(req: Request, res: Response) {
   const { namespace, key } = req.params;
   const cacheFile = `${cachePath}/${namespace}/${key}`;
 
-  const bucket = await StorageBucket.findOne({ name: namespace });
-  if (!bucket || (!bucket.isPublic && bucket.member)) {
+  const bucket = await StorageBucket.findOne({ where: { name: namespace }, relations: ["member"] });
+  const apiKey: ApiKey = expressContext.get("request:api_key");
+  if (!bucket || (!bucket.isPublic && (!apiKey || bucket.member.id !== apiKey.member.id))) {
     res.sendStatus(401);
     return;
   }
