@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+import cors from "cors";
 import express, { RequestHandler } from "express";
 import expressFileupload from "express-fileupload";
 import expressContext from "express-http-context";
@@ -63,7 +64,11 @@ app.put("/vulcan/storage/buckets/:name", permitted(vulcanStorage.updateBucket, "
 app.delete("/vulcan/storage/buckets/:name", permitted(vulcanStorage.deleteBucket, "Storage::Write"));
 
 // File Storage
-app.get("/storage/:namespace/:key", permitted(storage.readFile, "Storage::Read", true));
+const corsOptions = {
+  origin: (process.env.LUPPITER_ALLOWED_ORIGINS || "http://127.0.0.1:8080").split(","),
+};
+
+app.get("/storage/:namespace/:key", cors(corsOptions), permitted(storage.readFile, "Storage::Read", true));
 app.post("/storage/:namespace/:key", permitted(storage.writeFile, "Storage::Write", true));
 
 app.get("/ping", (req, res) => res.send("pong"));
