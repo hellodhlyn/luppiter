@@ -50,10 +50,13 @@ function permitted(handle: RequestHandler, permission: string, optional: boolean
   };
 }
 
+app.use(cors());
+
 // V1 (Vulcan)
 app.get("/vulcan/auth/me", vulcanAuth.getMe);
 app.get("/vulcan/auth/api_keys", vulcanAuth.listApiKeys);
 app.post("/vulcan/auth/api_keys", vulcanAuth.createApiKey);
+app.delete("/vulcan/auth/api_keys/:key", vulcanAuth.deleteApiKey);
 app.get("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.listPermissions);
 app.post("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.addPermission);
 app.delete("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.removePermission);

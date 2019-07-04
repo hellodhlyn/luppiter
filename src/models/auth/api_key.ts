@@ -62,7 +62,7 @@ export class ApiKey extends BaseEntity {
     return {
       key: this.key,
       memo: this.memo,
-      permissions: this.permissions.map((p) => p.toJson()),
+      permissions: (this.permissions || []).map((p) => p.toJson()),
       createdAt: this.createdAt.toISOString(),
     };
   }

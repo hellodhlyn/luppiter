@@ -35,7 +35,7 @@ async function createBucket(req: Request, res: Response) {
   bucket.member = apiKey.member;
   bucket.name = req.body.name;
   bucket.isPublic = req.body.isPublic === true;
-  bucket.save();
+  await bucket.save();
 
   res.json(bucket.toJson());
 }
@@ -56,7 +56,7 @@ async function updateBucket(req: Request, res: Response) {
   }
 
   bucket.isPublic = req.body.isPublic === true;
-  bucket.save();
+  await bucket.save();
 
   res.json(bucket.toJson());
 }
@@ -72,7 +72,7 @@ async function deleteBucket(req: Request, res: Response) {
     return;
   }
 
-  bucket.remove();
+  await bucket.remove();
 
   res.json(bucket.toJson());
 }

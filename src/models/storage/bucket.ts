@@ -29,6 +29,7 @@ export class StorageBucket extends BaseEntity {
     return {
       name: this.name,
       isPublic: this.isPublic,
+      createdAt: this.createdAt.toISOString(),
     };
   }
 

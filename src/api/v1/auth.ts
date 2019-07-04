@@ -86,6 +86,25 @@ async function createApiKey(req: Request, res: Response) {
   res.json(key.toJson());
 }
 
+// DELETE /vulcan/auth/api_keys/{key}
+async function deleteApiKey(req: Request, res: Response) {
+  let member: Member;
+  try {
+    member = await getMember(req.headers.authorization.split(" ").pop());
+  } catch (e) {
+    res.sendStatus(401);
+    return;
+  }
+
+  const key = await ApiKey.findOne({ where: { key: req.params.key }, relations: ["member", "permissions"] });
+  if (!key || key.member.id !== member.id) {
+    res.sendStatus(400);
+  }
+
+  key.remove();
+  res.json(key.toJson());
+}
+
 // GET /vulcan/auth/api_keys/{key}/permissions
 async function listPermissions(req: Request, res: Response) {
   let member: Member;
@@ -168,6 +187,7 @@ export default {
   getMe,
   listApiKeys,
   createApiKey,
+  deleteApiKey,
   listPermissions,
   addPermission,
   removePermission,
