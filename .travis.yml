@@ -15,7 +15,11 @@ install:
   - yarn global add codecov
 
 before_script:
+  - yarn build
+
   - psql -c 'create database luppiter_test;' -U postgres
+  - yarn typeorm migration:run
+  - yarn seed
 
 script:
   - yarn lint

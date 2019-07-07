@@ -22,12 +22,19 @@ async function readFile(req: Request, res: Response) {
     return;
   }
 
-  res.header("Content-Type", fileType(fileBody).mime).send(fileBody);
+  const type = fileType(fileBody);
+  res.header("Content-Type", type ? type.mime : "application/text").send(fileBody);
 }
 
 async function writeFile(req: Request, res: Response) {
   const { namespace, key } = req.params;
-  const bucket = await StorageBucket.findOne({ where: { name: namespace } });
+
+  const bucket = await StorageBucket.findOne({ where: { name: namespace }, relations: ["member"] });
+  const apiKey: ApiKey = expressContext.get("request:api_key");
+  if (!bucket || !apiKey || bucket.member.id !== apiKey.member.id) {
+    res.sendStatus(401);
+    return;
+  }
 
   const file = req.files.file as UploadedFile;
   try {
