@@ -2,11 +2,20 @@ language: node_js
 node_js:
   - '10'
 
+env:
+  - TYPEORM_CONNECTION=postgres TYPEORM_HOST=127.0.0.1 TYPEORM_PORT=5432 TYPEORM_USERNAME=postgres TYPEORM_DATABASE=luppiter_test TYPEORM_ENTITIES=dist/models/**/*.js TYPEORM_MIGRATIONS=dist/migration/*.js
+
+services:
+  - postgresql
+
 cache: yarn
 
 install:
   - yarn
   - yarn global add codecov
+
+before_script:
+  - psql -c 'create database luppiter_test;' -U postgres
 
 script:
   - yarn lint

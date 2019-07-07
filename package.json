@@ -7,13 +7,14 @@
   "main": "dist/index.js",
   "scripts": {
     "lint": "tslint -c tslint.json -p tsconfig.json --fix",
-    "test": "nyc mocha -r ts-node/register test/**/*.ts",
+    "pretest": "yarn build; TYPEORM_DATABASE=luppiter_test yarn typeorm migration:run; TYPEORM_DATABASE=luppiter_test yarn seed",
+    "test": "nyc mocha -r ts-node/register -r test/prepare.ts test/**/*.spec.ts",
     "coverage": "nyc report --reporter=json",
-    "prebuild": "yarn lint",
     "build": "tsc",
-    "prestart": "yarn build",
+    "prestart": "yarn lint; yarn build",
     "start": "node .",
-    "typeorm": "yarn build; node ./node_modules/typeorm/cli.js"
+    "typeorm": "node ./node_modules/typeorm/cli.js",
+    "seed": "TYPEORM_MIGRATIONS=dist/seeds/*.js yarn typeorm migration:run"
   },
   "dependencies": {
     "@types/cors": "^2.8.5",
@@ -38,6 +39,7 @@
     "@types/sinon": "^7.0.13",
     "chai": "^4.2.0",
     "mocha": "^6.1.4",
+    "mocha-prepare": "^0.1.0",
     "nyc": "^14.1.1",
     "sinon": "^7.3.2",
     "source-map-support": "^0.5.12",
