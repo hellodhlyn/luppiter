@@ -6,11 +6,16 @@ cache: yarn
 
 install:
   - yarn
+  - yarn global add codecov
 
 script:
-  - yarn prebuild
+  - yarn lint
+  - yarn test
 
 after_success:
+  - yarn coverage
+  - codecov -f coverage/*.json
+
   - if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
       docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
 

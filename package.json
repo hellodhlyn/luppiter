@@ -6,11 +6,13 @@
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
+    "lint": "tslint -c tslint.json -p tsconfig.json --fix",
+    "test": "nyc mocha -r ts-node/register test/**/*.ts",
+    "coverage": "nyc report --reporter=json",
+    "prebuild": "yarn lint",
     "build": "tsc",
     "prestart": "yarn build",
     "start": "node .",
-    "test": "nyc mocha -r ts-node/register test/**/*.ts",
     "typeorm": "yarn build; node ./node_modules/typeorm/cli.js"
   },
   "dependencies": {
