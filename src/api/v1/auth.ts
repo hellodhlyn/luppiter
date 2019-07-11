@@ -101,7 +101,7 @@ async function deleteApiKey(req: Request, res: Response) {
     res.sendStatus(400);
   }
 
-  key.remove();
+  await key.remove();
   res.json(key.toJson());
 }
 
@@ -150,10 +150,15 @@ async function addPermission(req: Request, res: Response) {
     res.sendStatus(400);
     return;
   }
-  key.permissions ? key.permissions.push(permission) : key.permissions = [permission];
-  key.save();
 
-  res.sendStatus(200);
+  if (!key.permissions) {
+    key.permissions = [permission];
+  } else if (key.permissions.findIndex((p) => p.key === permission.key) === -1) {
+    key.permissions.push(permission);
+  }
+  await key.save();
+
+  res.json(key.permissions.map((p) => p.toJson()));
 }
 
 // DELETE /vulcan/auth/api_keys/{key}/permissions
@@ -178,7 +183,7 @@ async function removePermission(req: Request, res: Response) {
   }
 
   key.permissions = key.permissions.filter((p) => p.key !== req.body.key);
-  key.save();
+  await key.save();
 
   res.sendStatus(200);
 }

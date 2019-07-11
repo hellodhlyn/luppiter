@@ -19,7 +19,6 @@ describe("storage apis", () => {
       permissions: [await Permission.findOne({ key: "Storage::*" })],
     });
   });
-  after(() => mockRequest.close());
 
   describe("GET /storage/:bucketName/:key", () => {
     let bucket: StorageBucket;
