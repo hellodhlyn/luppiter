@@ -1,17 +1,18 @@
 import S3 from "aws-sdk/clients/s3";
 
-export default class StorageService {
+export default class S3Client {
   private s3: S3;
-  private bucketName = "luppiter.lynlab.co.kr";
+  private bucketName: string;
 
-  constructor() {
+  constructor(bucketName: string) {
     this.s3 = new S3({ region: "ap-northeast-2" });
+    this.bucketName = bucketName;
   }
 
-  public read(namespace: string, key: string): Promise<S3.GetObjectOutput> {
+  public read(key: string): Promise<S3.GetObjectOutput> {
     const params = {
       Bucket: this.bucketName,
-      Key: `${namespace}/${key}`,
+      Key: key,
     };
 
     return new Promise((resolve, reject) => {
@@ -21,12 +22,11 @@ export default class StorageService {
     });
   }
 
-  public write(namespace: string, key: string, buffer: Buffer, contentType: string): Promise<S3.PutObjectOutput> {
+  public write(key: string, buffer: Buffer): Promise<S3.PutObjectOutput> {
     const params = {
       Bucket: this.bucketName,
-      Key: `${namespace}/${key}`,
+      Key: key,
       Body: buffer,
-      ContentType: contentType,
     };
 
     return new Promise((resolve, reject) => {

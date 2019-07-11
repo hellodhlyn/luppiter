@@ -50,7 +50,7 @@ async function createBucket(req: Request, res: Response) {
 async function updateBucket(req: Request, res: Response) {
   const apiKey: ApiKey = expressContext.get("request:api_key");
   const bucket = await StorageBucket.findOne({ where: { name: req.params.name }, relations: ["member"] });
-  if (bucket.member.id !== apiKey.member.id) {
+  if (!bucket || bucket.member.id !== apiKey.member.id) {
     res.sendStatus(401);
     return;
   }
@@ -67,7 +67,7 @@ async function updateBucket(req: Request, res: Response) {
 async function deleteBucket(req: Request, res: Response) {
   const apiKey: ApiKey = expressContext.get("request:api_key");
   const bucket = await StorageBucket.findOne({ where: { name: req.params.name }, relations: ["member"] });
-  if (bucket.member.id !== apiKey.member.id) {
+  if (!bucket || bucket.member.id !== apiKey.member.id) {
     res.sendStatus(401);
     return;
   }

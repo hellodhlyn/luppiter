@@ -2,15 +2,33 @@ language: node_js
 node_js:
   - '10'
 
+env:
+  - TYPEORM_CONNECTION=postgres TYPEORM_HOST=127.0.0.1 TYPEORM_PORT=5432 TYPEORM_USERNAME=postgres TYPEORM_DATABASE=luppiter_test TYPEORM_ENTITIES=dist/models/**/*.js TYPEORM_MIGRATIONS=dist/migration/*.js
+
+services:
+  - postgresql
+
 cache: yarn
 
 install:
   - yarn
+  - yarn global add codecov
+
+before_script:
+  - yarn build
+
+  - psql -c 'create database luppiter_test;' -U postgres
+  - yarn typeorm migration:run
+  - yarn seed
 
 script:
-  - yarn prebuild
+  - yarn lint
+  - yarn test
 
 after_success:
+  - yarn coverage
+  - codecov -f coverage/*.json
+
   - if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
       docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
 
