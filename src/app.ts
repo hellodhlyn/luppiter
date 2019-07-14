@@ -16,6 +16,11 @@ app.use(expressFileupload({
   limits: { fileSize: 10 * 1024 * 1024 },
 }));
 
+const corsOptions = {
+  origin: (process.env.LUPPITER_ALLOWED_ORIGINS || "http://127.0.0.1:8080").split(","),
+};
+app.use(cors(corsOptions));
+
 function permitted(handle: RequestHandler, permission: string, optional: boolean = false): RequestHandler {
   return async (req, res, next) => {
     const key = req.header("X-Api-Key");
@@ -39,16 +44,15 @@ function permitted(handle: RequestHandler, permission: string, optional: boolean
   };
 }
 
-app.use(cors());
-
 // V1 (Vulcan)
 app.get("/vulcan/auth/me", vulcanAuth.getMe);
 app.get("/vulcan/auth/api_keys", vulcanAuth.listApiKeys);
 app.post("/vulcan/auth/api_keys", vulcanAuth.createApiKey);
 app.delete("/vulcan/auth/api_keys/:key", vulcanAuth.deleteApiKey);
-app.get("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.listPermissions);
-app.post("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.addPermission);
-app.delete("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.removePermission);
+app.get("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.listKeyPermissions);
+app.post("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.addKeyPermission);
+app.delete("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.removeKeyPermission);
+app.get("/vulcan/auth/permissions", vulcanAuth.listPermissions);
 
 app.get("/vulcan/storage/buckets", permitted(vulcanStorage.listBuckets, "Storage::Read"));
 app.post("/vulcan/storage/buckets", permitted(vulcanStorage.createBucket, "Storage::Write"));
@@ -56,11 +60,7 @@ app.put("/vulcan/storage/buckets/:name", permitted(vulcanStorage.updateBucket, "
 app.delete("/vulcan/storage/buckets/:name", permitted(vulcanStorage.deleteBucket, "Storage::Write"));
 
 // File Storage
-const corsOptions = {
-  origin: (process.env.LUPPITER_ALLOWED_ORIGINS || "http://127.0.0.1:8080").split(","),
-};
-
-app.get("/storage/:namespace/:key", cors(corsOptions), permitted(storage.readFile, "Storage::Read", true));
+app.get("/storage/:namespace/:key", permitted(storage.readFile, "Storage::Read", true));
 app.post("/storage/:namespace/:key", permitted(storage.writeFile, "Storage::Write", true));
 
 app.get("/ping", (req, res) => res.send("pong"));

@@ -2,9 +2,9 @@
 import dotenv from "dotenv";
 import { createConnection } from "typeorm";
 
-import app from "./app";
-
 dotenv.config();
+
+import app from "./app";
 
 // Establish database connection.
 createConnection();
