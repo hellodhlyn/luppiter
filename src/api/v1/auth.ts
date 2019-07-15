@@ -2,6 +2,7 @@ import axios from "axios";
 import crypto from "crypto";
 import { Request, Response } from "express";
 import { Agent } from "https";
+import { Like } from "typeorm";
 
 import { ApiKey } from "../../models/auth/api_key";
 import { Member } from "../../models/auth/member";
@@ -106,7 +107,7 @@ async function deleteApiKey(req: Request, res: Response) {
 }
 
 // GET /vulcan/auth/api_keys/{key}/permissions
-async function listPermissions(req: Request, res: Response) {
+async function listKeyPermissions(req: Request, res: Response) {
   let member: Member;
   try {
     member = await getMember(req.headers.authorization.split(" ").pop());
@@ -130,7 +131,7 @@ async function listPermissions(req: Request, res: Response) {
 // {
 //   "key": "string"
 // }
-async function addPermission(req: Request, res: Response) {
+async function addKeyPermission(req: Request, res: Response) {
   let member: Member;
   try {
     member = await getMember(req.headers.authorization.split(" ").pop());
@@ -167,7 +168,7 @@ async function addPermission(req: Request, res: Response) {
 // {
 //   "key": "string"
 // }
-async function removePermission(req: Request, res: Response) {
+async function removeKeyPermission(req: Request, res: Response) {
   let member: Member;
   try {
     member = await getMember(req.headers.authorization.split(" ").pop());
@@ -185,7 +186,22 @@ async function removePermission(req: Request, res: Response) {
   key.permissions = key.permissions.filter((p) => p.key !== req.body.key);
   await key.save();
 
-  res.sendStatus(200);
+  res.json(key.permissions.map((p) => p.toJson()));
+}
+
+// GET /vulcan/auth/permissions
+//
+// Query params:
+//   - query (string)
+async function listPermissions(req: Request, res: Response) {
+  const { query } = req.query;
+  if (!query || query.length < 2) {
+    res.json([]);
+    return;
+  }
+
+  const permissions = await Permission.find({ key: Like(`%${req.query.query}%`) });
+  res.json(permissions.map((p) => p.toJson()));
 }
 
 export default {
@@ -193,7 +209,8 @@ export default {
   listApiKeys,
   createApiKey,
   deleteApiKey,
+  listKeyPermissions,
+  addKeyPermission,
+  removeKeyPermission,
   listPermissions,
-  addPermission,
-  removePermission,
 };

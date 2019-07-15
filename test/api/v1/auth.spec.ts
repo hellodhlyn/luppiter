@@ -29,7 +29,7 @@ describe("vulcan auth apis", () => {
           expect(res.body.uuid).to.equal(memberData.uuid);
 
           const member = await Member.findOne({ uuid: memberData.uuid });
-          expect(member).not.to.be.undefined;
+          expect(member).to.not.be.undefined;
           done();
         })
         .catch(e => done(e));
@@ -155,6 +155,30 @@ describe("vulcan auth apis", () => {
           done();
         })
         .catch(e => done(e));
+    });
+
+    context("GET /vulcan/auth/permissions", () => {
+      it("query exists", (done) => {
+        mockRequest.get(`/vulcan/auth/permissions`)
+          .query({ query: "::Read" })
+          .then(async (res) => {
+            expect(res.status).to.equal(200);
+            expect(res.body.length).to.not.equal(0);
+            expect(res.body[0].key).to.have.string("::Read");
+            done();
+          })
+          .catch(e => done(e));
+      });
+
+      it("query too short", (done) => {
+        mockRequest.get(`/vulcan/auth/permissions`)
+          .query({ query: "S" })
+          .then(async (res) => {
+            expect(res.body.length).to.equal(0);
+            done();
+          })
+          .catch(e => done(e));
+      });
     });
   });
 
