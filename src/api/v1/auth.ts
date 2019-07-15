@@ -186,7 +186,7 @@ async function removeKeyPermission(req: Request, res: Response) {
   key.permissions = key.permissions.filter((p) => p.key !== req.body.key);
   await key.save();
 
-  res.sendStatus(200);
+  res.json(key.permissions.map((p) => p.toJson()));
 }
 
 // GET /vulcan/auth/permissions
