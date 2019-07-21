@@ -1,12 +1,16 @@
 import { expect } from "chai";
 import faker = require("faker");
 import { Factory } from "rosie";
+import sinon from "sinon";
 
 import mockRequest from "../mock-request";
 import { Member } from "../../../src/models/auth/member";
 import { ApiKey } from "../../../src/models/auth/api_key";
 import { Permission } from "../../../src/models/auth/permission";
 import HostingInstance from "../../../src/models/hosting/instance";
+import CloudflareClient from "../../../src/libs/cloudflare";
+import { DNSRecord } from "../../../src/libs/cloudflare/responses";
+
 
 describe("vulcan hosting apis", () => {
   let member: Member;
@@ -51,6 +55,13 @@ describe("vulcan hosting apis", () => {
 
   context("POST /vuclan/hosting/instances", () => {
     const expectedName = faker.random.uuid();
+    let spy: sinon.SinonStub;
+
+    beforeEach(() => {
+      spy = sinon.stub(CloudflareClient.prototype, "postZonesDnsRecord")
+        .returns(new Promise((resolve) => resolve({ success: true })));
+    });
+    afterEach(() => spy.restore());
 
     it("success", (done) => {
       mockRequest.post("/vulcan/hosting/instances")
@@ -60,6 +71,7 @@ describe("vulcan hosting apis", () => {
           expect(res.status).to.equal(200);
           const instance = await HostingInstance.findOne({ name: expectedName });
           expect(instance).to.not.be.undefined;
+          expect(spy.calledOnce).to.be.true;
           done();
         })
         .catch(e => done(e));
@@ -71,6 +83,7 @@ describe("vulcan hosting apis", () => {
         .send({ name: expectedName })
         .then(async (res) => {
           expect(res.status).to.equal(400);
+          expect(spy.notCalled).to.be.true;
           done();
         })
         .catch(e => done(e));
@@ -79,8 +92,23 @@ describe("vulcan hosting apis", () => {
 
   context("DELETE /vuclan/hosting/instances/:uuid", () => {
     let instance: HostingInstance;
+    let listSpy: sinon.SinonStub;
+    let deleteSpy: sinon.SinonStub;
+    const dummyDns: DNSRecord = {
+      id: "dummy", type: "A", name: "dummy", content: "dummy.com", proxiable: false, proxied: false, ttl: 1,
+      locked: false, zone_id: "dummy", zone_name: "dummy", created_on: "dummy", modified_on: "dummy", data: {},
+    };
+
     beforeEach(async () => {
       instance = await Factory.build<HostingInstance>("HostingInstance", { member });
+      listSpy = sinon.stub(CloudflareClient.prototype, "listZonesDnsRecords")
+        .returns(new Promise((resolve) => resolve({ success: true, result: [dummyDns] })));
+      deleteSpy = sinon.stub(CloudflareClient.prototype, "deleteZonesDnsRecord")
+        .returns(new Promise((resolve) => resolve({ success: true })));
+    });
+    afterEach(() => {
+      listSpy.restore();
+      deleteSpy.restore();
     });
 
     it("success", (done) => {
@@ -89,6 +117,7 @@ describe("vulcan hosting apis", () => {
         .then(async (res) => {
           expect(res.status).to.equal(200);
           expect(res.body.name).to.equal(instance.name);
+          expect(listSpy.calledOnce).to.be.true;
 
           instance = await HostingInstance.findOne({ uuid: instance.uuid });
           expect(instance).to.be.undefined;

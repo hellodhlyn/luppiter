@@ -9,12 +9,15 @@ import HostingInstance from "./instance";
 
 @Entity({ name: "hosting_backends" })
 @TableInheritance({ column: { name: "type", type: "varchar" } })
-class HostingBackend extends BaseEntity implements Propertiable {
+class HostingBackend extends BaseEntity {
   @PrimaryGeneratedColumn()
   public id: number;
 
   @Column({ name: "uuid" })
   public uuid: string;
+
+  @Column({ name: "type" })
+  public type: string;
 
   @OneToOne(() => HostingInstance)
   @JoinColumn({ name: "instance_id" })

@@ -5,7 +5,6 @@ import { ApiKey } from "../../models/auth/api_key";
 import HostingInstance from "../../models/hosting/instance";
 
 // POST /vulcan/hosting/instances
-//
 // Required permission: `Hosting::Read`
 async function listInstances(req: Request, res: Response) {
   const apiKey: ApiKey = expressContext.get("request:api_key");
@@ -35,6 +34,8 @@ async function createInstance(req: Request, res: Response) {
   res.json(instance.toJson());
 }
 
+// DELETE /vulcan/hosting/instances/:uuid
+// Required permission: `Hosting::Write`
 async function deleteInstance(req: Request, res: Response) {
   const apiKey: ApiKey = expressContext.get("request:api_key");
   const instance = await HostingInstance.findOne({ where: { uuid: req.params.uuid }, relations: ["member"] });
