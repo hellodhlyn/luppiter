@@ -7,6 +7,7 @@ import storage from "./api/storage";
 import vulcanAuth from "./api/v1/auth";
 import vulcanCerts from "./api/v1/certs";
 import vulcanCloudContainer from "./api/v1/cloudcontainer";
+import vulcanHosting from "./api/v1/hosting";
 import vulcanStorage from "./api/v1/storage";
 import { ApiKey } from "./models/auth/api_key";
 
@@ -64,6 +65,10 @@ app.post("/vulcan/cloudcontainer/tasks", permitted(vulcanCloudContainer.createTa
 app.put("/vulcan/cloudcontainer/tasks/:uuid", permitted(vulcanCloudContainer.updateTask, "CloudContainer::Write"));
 app.delete("/vulcan/cloudcontainer/tasks/:uuid", permitted(vulcanCloudContainer.deleteTask, "CloudContainer::Write"));
 app.post("/vulcan/cloudcontainer/tasks/:uuid/run", permitted(vulcanCloudContainer.runTask, "CloudContainer::Write"));
+
+app.get("/vulcan/hosting/instances", permitted(vulcanHosting.listInstances, "Hosting::Read"));
+app.post("/vulcan/hosting/instances", permitted(vulcanHosting.createInstance, "Hosting::Write"));
+app.delete("/vulcan/hosting/instances/:uuid", permitted(vulcanHosting.deleteInstance, "Hosting::Write"));
 
 app.get("/vulcan/storage/buckets", permitted(vulcanStorage.listBuckets, "Storage::Read"));
 app.post("/vulcan/storage/buckets", permitted(vulcanStorage.createBucket, "Storage::Write"));

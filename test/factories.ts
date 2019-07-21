@@ -10,6 +10,7 @@ import { CloudContainerHistory } from "../src/models/cloudcontainer/history";
 import { Permission } from "../src/models/auth/permission";
 import { StorageBucket } from "../src/models/storage/bucket";
 import Repositories from "../src/models/repositories";
+import HostingInstance from "../src/models/hosting/instance";
 
 export default function buildFactories() {
   // Auth models
@@ -84,6 +85,19 @@ export default function buildFactories() {
     .attr("updatedAt", () => new Date())
     .after(async (obj) => {
       return Repositories.getRepository(CloudContainerTask).then((repo) => repo.save(obj));
+    });
+
+  // Hosting models
+  Factory.define<HostingInstance>("HostingInstance")
+    .sequence("id")
+    .attr("uuid", () => faker.random.uuid())
+    .attr("name", () => faker.random.uuid())
+    .attr("member", () => Factory.build<Member>("Member"))
+    .attr("domainKey", () => faker.random.alphaNumeric(20))
+    .attr("createdAt", () => new Date())
+    .attr("updatedAt", () => new Date())
+    .after(async (obj) => {
+      return Repositories.getRepository(HostingInstance).then((repo) => repo.save(obj));
     });
 
   // Storage models
