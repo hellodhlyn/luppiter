@@ -12,7 +12,6 @@ message RegisterClientRequest {
 
 message RegisterClientResponse {
   required string email = 1;
-  required bytes privKey = 2;
 }
 
 message FetchDomainsRequest {

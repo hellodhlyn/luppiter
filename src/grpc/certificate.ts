@@ -1,5 +1,7 @@
 import * as protoLoader from "@grpc/proto-loader";
 import * as grpc from "grpc";
+import { Certificate } from "../models/certs/certificate";
+import { CertificateProvision } from "../models/certs/certificate-provision";
 
 export default class CertificateGrpcService {
   private protoPath = __dirname + "../../../protos/certificate.proto";
@@ -27,21 +29,31 @@ export default class CertificateGrpcService {
     return this.server;
   }
 
-  // TODO - implement
-  private registerClient(call: any, callback: any) {
+  private async registerClient(call: any, callback: any) {
     const { uuid } = call.request;
-    callback(null, { email: "", privKey: "" });
+    const cert = await Certificate.findOne({ uuid });
+    callback(null, { email: cert.email });
   }
 
-  // TODO - implement
-  private fetchDomains(call: any, callback: any) {
+  private async fetchDomains(call: any, callback: any) {
     const { uuid } = call.request;
-    callback(null, { domains: [""], dnsToken: "" });
+    const cert = await Certificate.findOne({ uuid });
+    callback(null, { domains: cert.domains, dnsToken: cert.dnsToken });
   }
 
-  // TODO - implement
-  private verifiedCallback(call: any, callback: any) {
+  private async verifiedCallback(call: any, callback: any) {
     const { uuid, csr, privKey, certificate } = call.request;
+
+    const cert = await Certificate.findOne({ where: { uuid }, relations: ["provisions"] });
+
+    const provision = new CertificateProvision();
+    provision.certificateModel = cert;
+    provision.revision = cert.lastRevision() + 1;
+    provision.csr = csr;
+    provision.privateKey = privKey;
+    provision.certificate = certificate;
+    provision.expireAt = new Date(new Date().getTime() + 90 * 24 * 60 * 60 * 1000);
+
     callback(null, {});
   }
 }
