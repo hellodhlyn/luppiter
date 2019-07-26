@@ -1,0 +1,34 @@
+package certificate;
+
+service Certificate {
+  rpc RegisterClient(RegisterClientRequest) returns (RegisterClientResponse) {}
+  rpc FetchDomains(FetchDomainsRequest) returns (FetchDomainsResponse) {}
+  rpc VerifiedCallback(VerifiedCallbackRequest) returns (VerifiedCallbackResponse) {}
+}
+
+message RegisterClientRequest {
+  required string uuid = 1;
+}
+
+message RegisterClientResponse {
+  required string email = 1;
+  required bytes privKey = 2;
+}
+
+message FetchDomainsRequest {
+  required string uuid = 1;
+}
+
+message FetchDomainsResponse {
+  repeated string domains = 1;
+  required string dnsToken = 2;
+}
+
+message VerifiedCallbackRequest {
+  required string uuid = 1;
+  required bytes csr = 2;
+  required bytes privKey = 3;
+  required bytes certificate = 4;
+}
+
+message VerifiedCallbackResponse {}
