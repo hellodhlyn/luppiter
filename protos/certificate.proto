@@ -3,6 +3,7 @@ package certificate;
 service Certificate {
   rpc RegisterClient(RegisterClientRequest) returns (RegisterClientResponse) {}
   rpc FetchDomains(FetchDomainsRequest) returns (FetchDomainsResponse) {}
+  rpc RegisterChallenges(RegisterChallengesRequest) returns (RegisterChallengesResponse) {}
   rpc VerifiedCallback(VerifiedCallbackRequest) returns (VerifiedCallbackResponse) {}
 }
 
@@ -22,6 +23,13 @@ message FetchDomainsResponse {
   repeated string domains = 1;
   required string dnsToken = 2;
 }
+
+message RegisterChallengesRequest {
+  required string uuid = 1;
+  repeated string records = 2;
+}
+
+message RegisterChallengesResponse {}
 
 message VerifiedCallbackRequest {
   required string uuid = 1;

@@ -34,7 +34,7 @@ export class CertificateProvision extends BaseEntity {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @ManyToOne(() => Certificate, (cert) => cert)
+  @ManyToOne(() => Certificate, (cert) => cert.provisions)
   @JoinColumn({ name: "certificate_id" })
   public certificateModel: Certificate;
 

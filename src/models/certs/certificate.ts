@@ -34,7 +34,7 @@ export class Certificate extends BaseEntity {
   @Column({ name: "dns_token", type: "varchar" })
   public dnsToken: string;
 
-  @OneToMany(() => CertificateProvision, (provision) => provision.certificate)
+  @OneToMany(() => CertificateProvision, (provision) => provision.certificateModel)
   public provisions: CertificateProvision[];
 
   @CreateDateColumn({ name: "created_at" })

@@ -20,12 +20,12 @@ describe("vulcan certs apis", () => {
     });
   });
 
-  describe("POST /vulcan/certs/certificate", () => {
+  describe("POST /vulcan/certs/certificates", () => {
     const email = faker.internet.email();
     const domains = [faker.internet.domainName(), faker.internet.domainName()];
 
     it("success", (done) => {
-      mockRequest.post("/vulcan/certs/certificate")
+      mockRequest.post("/vulcan/certs/certificates")
         .set("X-Api-Key", apiKey.key)
         .send({ email, domains })
         .then(async (res) => {

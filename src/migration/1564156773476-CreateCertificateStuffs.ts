@@ -37,7 +37,11 @@ export class CreateCertificateStuffs1564156773476 implements MigrationInterface 
         { name: "updated_at", type: "timestamp with time zone", default: "now()" },
       ],
       indices: [
-        { name: "idx_certificate_provisions_certificate_id_revision", columnNames: ["certificate_id", "revision"], isUnique: true },
+        {
+          name: "idx_certificate_provisions_certificate_id_revision",
+          columnNames: ["certificate_id", "revision"],
+          isUnique: true,
+        },
         { name: "idx_certificate_provisions_expire_at", columnNames: ["expire_at"] },
       ],
     }));
