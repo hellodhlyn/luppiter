@@ -4,6 +4,8 @@ import { Factory } from "rosie";
 
 import { Member } from "../src/models/auth/member";
 import { ApiKey } from "../src/models/auth/api_key";
+import { CloudContainerTask } from "../src/models/cloudcontainer/task";
+import { CloudContainerHistory } from "../src/models/cloudcontainer/history";
 import { Permission } from "../src/models/auth/permission";
 import { StorageBucket } from "../src/models/storage/bucket";
 import Repositories from "../src/models/repositories";
@@ -38,6 +40,34 @@ export default function buildFactories() {
     .attr("updatedAt", () => new Date())
     .after(async (permission) => {
       return Repositories.getRepository(Permission).then((repo) => repo.save(permission));
+    });
+
+  // CloudContainer models
+  Factory.define<CloudContainerTask>("CloudContainerTask")
+    .sequence("id")
+    .attr("uuid", () => faker.random.uuid())
+    .attr("member", () => Factory.build<Member>("Member"))
+    .attr("name", () => faker.random.word())
+    .attr("dockerImage", () => `${faker.random.word()}/${faker.random.word()}`)
+    .attr("dockerCommands", () => ["echo", "'hello world"])
+    .attr("dockerEnvs", () => ["KEY=VALUE"])
+    .attr("createdAt", () => new Date())
+    .attr("updatedAt", () => new Date())
+    .after(async (obj) => {
+      return Repositories.getRepository(CloudContainerTask).then((repo) => repo.save(obj));
+    });
+
+  Factory.define<CloudContainerHistory>("CloudContainerHistory")
+    .sequence("id")
+    .attr("uuid", () => faker.random.uuid())
+    .attr("task", () => Factory.build<CloudContainerTask>("CloudContainerTask"))
+    .attr("containerId", () => faker.random.uuid())
+    .attr("exitCode", () => "0")
+    .attr("terminatedAt", () => new Date())
+    .attr("createdAt", () => new Date())
+    .attr("updatedAt", () => new Date())
+    .after(async (obj) => {
+      return Repositories.getRepository(CloudContainerTask).then((repo) => repo.save(obj));
     });
 
   // Storage models

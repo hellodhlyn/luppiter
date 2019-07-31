@@ -51,7 +51,7 @@ async function updateTask(req: Request, res: Response) {
   const apiKey: ApiKey = expressContext.get("request:api_key");
   const task = await CloudContainerTask.findOne({ where: { uuid: req.params.uuid }, relations: ["member"] });
   if (!task || apiKey.member.id !== task.member.id) {
-    res.status(400).json({ error: "invalid_uuid" });
+    res.status(401).json({ error: "invalid_uuid" });
     return;
   }
 
@@ -69,7 +69,7 @@ async function updateTask(req: Request, res: Response) {
   }
   await task.save();
 
-  res.sendStatus(200);
+  res.json(task.toJson());
 }
 
 // GET /vulcan/cloudcontainer/tasks/:uuid/run
@@ -77,7 +77,7 @@ async function runTask(req: Request, res: Response) {
   const apiKey: ApiKey = expressContext.get("request:api_key");
   const task = await CloudContainerTask.findOne({ where: { uuid: req.params.uuid }, relations: ["member"] });
   if (!task || apiKey.member.id !== task.member.id) {
-    res.status(400).json({ error: "invalid_uuid" });
+    res.status(401).json({ error: "invalid_uuid" });
     return;
   }
 

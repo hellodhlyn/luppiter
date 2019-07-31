@@ -63,7 +63,7 @@ export class CloudContainerTask extends BaseEntity {
     };
   }
 
-  public async run(): Promise<any> {
+  public async run(): Promise<CloudContainerHistory> {
     const docker = DockerClient.getInstance();
     const container = await docker.createContainer({
       Image: this.dockerImage,
@@ -76,7 +76,8 @@ export class CloudContainerTask extends BaseEntity {
     history.containerId = container.id;
     await history.save();
 
-    return container.start();
+    await container.start();
+    return history;
   }
 
 }
