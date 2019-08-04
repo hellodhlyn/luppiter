@@ -4,6 +4,7 @@ import { Factory } from "rosie";
 
 import { Member } from "../src/models/auth/member";
 import { ApiKey } from "../src/models/auth/api_key";
+import { Certificate } from "../src/models/certs/certificate";
 import { CloudContainerTask } from "../src/models/cloudcontainer/task";
 import { CloudContainerHistory } from "../src/models/cloudcontainer/history";
 import { Permission } from "../src/models/auth/permission";
@@ -40,6 +41,21 @@ export default function buildFactories() {
     .attr("updatedAt", () => new Date())
     .after(async (permission) => {
       return Repositories.getRepository(Permission).then((repo) => repo.save(permission));
+    });
+
+  // Certs models
+  Factory.define<Certificate>("Certificate")
+    .sequence("id")
+    .attr("uuid", () => faker.random.uuid())
+    .attr("state", () => "submitted")
+    .attr("member", () => Factory.build<Member>("Member"))
+    .attr("email", () => faker.internet.email())
+    .attr("domains", () => [faker.internet.domainName()])
+    .attr("dnsToken", () => crypto.randomBytes(20).toString("hex"))
+    .attr("createdAt", () => new Date())
+    .attr("updatedAt", () => new Date())
+    .after(async (obj) => {
+      return Repositories.getRepository(Certificate).then((repo) => repo.save(obj));
     });
 
   // CloudContainer models
