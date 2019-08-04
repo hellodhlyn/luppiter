@@ -4,6 +4,15 @@ import expressContext from "express-http-context";
 import { ApiKey } from "../../models/auth/api_key";
 import { Certificate } from "../../models/certs/certificate";
 
+// GET /vulcan/certs/certificates
+//
+// Required permission: `Certs::Read`
+async function listCertificates(_: Request, res: Response) {
+  const apiKey: ApiKey = expressContext.get("request:api_key");
+  const certs = await Certificate.find({ member: apiKey.member });
+  res.json(certs.map((cert) => cert.toJson()));
+}
+
 // POST /vulcan/certs/certificates
 //
 // Required permission: `Certs::Write`
@@ -24,5 +33,6 @@ async function createCertificate(req: Request, res: Response) {
 }
 
 export default {
+  listCertificates,
   createCertificate,
 };

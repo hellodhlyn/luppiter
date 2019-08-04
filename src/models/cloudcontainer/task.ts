@@ -64,20 +64,31 @@ export class CloudContainerTask extends BaseEntity {
   }
 
   public async run(envs?: string[]): Promise<CloudContainerHistory> {
-    if (!envs) {
-      envs = this.dockerEnvs;
-    }
+    // Set environment variables.
+    const envsMap = new Map();
+    this.dockerEnvs
+      .map((env) => env.split("="))
+      .forEach((split) => envsMap.set(split[0], split[1]));
 
+    (envs || [])
+      .map((env) => env.split("="))
+      .forEach((split) => envsMap.set(split[0], split[1]));
+
+    const mergedEnvs: string[] = [];
+    envsMap.forEach((v, k) => mergedEnvs.push(`${k}=${v}`));
+
+    // Download docker image.
     const docker = DockerClient.getInstance();
     const image = docker.getImage(this.dockerImage);
     if (!image) {
       await docker.pull(this.dockerImage, {});
     }
 
+    // Start container.
     const container = await docker.createContainer({
       Image: this.dockerImage,
       Cmd: this.dockerCommands.length > 0 ? this.dockerCommands : null,
-      Env: envs.length > 0 ? envs : null,
+      Env: mergedEnvs.length > 0 ? mergedEnvs : null,
     });
 
     const history = new CloudContainerHistory();

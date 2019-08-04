@@ -56,6 +56,7 @@ app.post("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.addKeyPermission);
 app.delete("/vulcan/auth/api_keys/:key/permissions", vulcanAuth.removeKeyPermission);
 app.get("/vulcan/auth/permissions", vulcanAuth.listPermissions);
 
+app.get("/vulcan/certs/certificates", permitted(vulcanCerts.listCertificates, "Certs::Read"));
 app.post("/vulcan/certs/certificates", permitted(vulcanCerts.createCertificate, "Certs::Write"));
 
 app.get("/vulcan/cloudcontainer/tasks", permitted(vulcanCloudContainer.listTasks, "CloudContainer::*"));

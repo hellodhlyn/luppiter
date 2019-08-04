@@ -89,6 +89,9 @@ export default class CertificateGrpcService {
       return;
     }
 
+    cert.state = "issued";
+    await cert.save();
+
     const provision = new CertificateProvision();
     provision.certificateModel = cert;
     provision.revision = cert.lastRevision() + 1;
@@ -98,13 +101,14 @@ export default class CertificateGrpcService {
     provision.expireAt = new Date(new Date().getTime() + 90 * 24 * 60 * 60 * 1000);
     await provision.save();
 
-    try {
-      cert.state = "issued";
-      await cert.save();
-    } catch (_) {
-      // Ignore some buggy action.
-      // https://github.com/typeorm/typeorm/issues/3801
-    }
+    // Clean Up dns records.
+    const cfToken = process.env.CLOUDFLARE_API_TOKEN;
+    const cfZoneId = process.env.CLOUDFLARE_ZONE_ID;
+    const cf = CloudflareClient.getInstance(cfToken);
+    const records = await cf.listZonesDnsRecords(cfZoneId, { name: `${cert.dnsToken}.luppiter.dev` });
+    records.result.forEach(async (result) => {
+      await cf.deleteZonesDnsRecord(cfZoneId, result.id);
+    });
 
     callback(null, {});
   }

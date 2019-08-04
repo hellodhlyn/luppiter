@@ -6,6 +6,7 @@ import {
 import uuidv4 from "uuid/v4";
 
 import { Member } from "../auth/member";
+import { CloudContainerTask } from "../cloudcontainer/task";
 import { CertificateProvision } from "./certificate-provision";
 
 @Entity({ name: "certificates" })
@@ -51,8 +52,9 @@ export class Certificate extends BaseEntity {
   }
 
   @AfterInsert()
-  public startIssueWorker() {
-    // TODO implement
+  public async startIssueWorker() {
+    const task = await CloudContainerTask.findOne({ name: "Luppiter::CertsWorker" });
+    task.run([`WORKER_UUID=${this.uuid}`]);
   }
 
   public toJson() {
