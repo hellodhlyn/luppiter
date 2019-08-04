@@ -119,6 +119,26 @@ describe("vulcan cloudcontainer apis", () => {
     });
   });
 
+  describe("DELETE /vulcan/cloudcontainer/tasks/:uuid", () => {
+    let task: CloudContainerTask;
+    beforeEach(async () => {
+      task = await Factory.build<CloudContainerTask>("CloudContainerTask", { member });
+    });
+
+    it("success", (done) => {
+      mockRequest.delete(`/vulcan/cloudcontainer/tasks/${task.uuid}`)
+        .set("X-Api-Key", apiKey.key)
+        .then(async (res) => {
+          expect(res.status).to.equal(200);
+          
+          task = await CloudContainerTask.findOne({ uuid: task.uuid });
+          expect(task).to.be.undefined;
+          done();
+        })
+        .catch(e => done(e));
+    });
+  });
+
   describe("GET /vulcan/cloudcontainer/tasks/:uuid/run", () => {
     let task: CloudContainerTask;
 
@@ -140,7 +160,7 @@ describe("vulcan cloudcontainer apis", () => {
     });
 
     it("success", (done) => {
-      mockRequest.get(`/vulcan/cloudcontainer/tasks/${task.uuid}/run`)
+      mockRequest.post(`/vulcan/cloudcontainer/tasks/${task.uuid}/run`)
         .set("X-Api-Key", apiKey.key)
         .then(async (res) => {
           expect(res.status).to.equal(201);
@@ -151,7 +171,7 @@ describe("vulcan cloudcontainer apis", () => {
     });
 
     it("raise 401 for non-owner", (done) => {
-      mockRequest.get(`/vulcan/cloudcontainer/tasks/${task.uuid}/run`)
+      mockRequest.post(`/vulcan/cloudcontainer/tasks/${task.uuid}/run`)
         .set("X-Api-Key", strangerKey.key)
         .then(res => {
           expect(res.status).to.equal(401);

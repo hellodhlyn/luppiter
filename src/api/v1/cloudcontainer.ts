@@ -72,7 +72,29 @@ async function updateTask(req: Request, res: Response) {
   res.json(task.toJson());
 }
 
-// GET /vulcan/cloudcontainer/tasks/:uuid/run
+// DELETE /vulcan/cloudcontainer/tasks/:uuid
+//
+// Required permission: `CloudContainer::Write`
+async function deleteTask(req: Request, res: Response) {
+  const apiKey: ApiKey = expressContext.get("request:api_key");
+  const task = await CloudContainerTask.findOne({ where: { uuid: req.params.uuid }, relations: ["member"] });
+  if (!task || apiKey.member.id !== task.member.id) {
+    res.status(401).json({ error: "invalid_uuid" });
+    return;
+  }
+
+  await task.remove();
+
+  res.json(task.toJson());
+}
+
+// POST /vulcan/cloudcontainer/tasks/:uuid/run
+//
+// Required permission: `CloudContainer::Write`
+// Request Body:
+// {
+//   "envs": ["string"]?
+// }
 async function runTask(req: Request, res: Response) {
   const apiKey: ApiKey = expressContext.get("request:api_key");
   const task = await CloudContainerTask.findOne({ where: { uuid: req.params.uuid }, relations: ["member"] });
@@ -93,5 +115,6 @@ export default {
   listTasks,
   createTask,
   updateTask,
+  deleteTask,
   runTask,
 };

@@ -58,7 +58,8 @@ app.get("/vulcan/auth/permissions", vulcanAuth.listPermissions);
 app.get("/vulcan/cloudcontainer/tasks", permitted(vulcanCloudContainer.listTasks, "CloudContainer::*"));
 app.post("/vulcan/cloudcontainer/tasks", permitted(vulcanCloudContainer.createTask, "CloudContainer::Write"));
 app.put("/vulcan/cloudcontainer/tasks/:uuid", permitted(vulcanCloudContainer.updateTask, "CloudContainer::Write"));
-app.get("/vulcan/cloudcontainer/tasks/:uuid/run", permitted(vulcanCloudContainer.runTask, "CloudContainer::Write"));
+app.delete("/vulcan/cloudcontainer/tasks/:uuid", permitted(vulcanCloudContainer.deleteTask, "CloudContainer::Write"));
+app.post("/vulcan/cloudcontainer/tasks/:uuid/run", permitted(vulcanCloudContainer.runTask, "CloudContainer::Write"));
 
 app.get("/vulcan/storage/buckets", permitted(vulcanStorage.listBuckets, "Storage::Read"));
 app.post("/vulcan/storage/buckets", permitted(vulcanStorage.createBucket, "Storage::Write"));

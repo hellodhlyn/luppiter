@@ -63,12 +63,21 @@ export class CloudContainerTask extends BaseEntity {
     };
   }
 
-  public async run(): Promise<CloudContainerHistory> {
+  public async run(envs?: string[]): Promise<CloudContainerHistory> {
+    if (!envs) {
+      envs = this.dockerEnvs;
+    }
+
     const docker = DockerClient.getInstance();
+    const image = docker.getImage(this.dockerImage);
+    if (!image) {
+      await docker.pull(this.dockerImage, {});
+    }
+
     const container = await docker.createContainer({
       Image: this.dockerImage,
-      Cmd: this.dockerCommands,
-      Env: this.dockerEnvs,
+      Cmd: this.dockerCommands.length > 0 ? this.dockerCommands : null,
+      Env: envs.length > 0 ? envs : null,
     });
 
     const history = new CloudContainerHistory();
