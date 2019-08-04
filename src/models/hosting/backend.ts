@@ -1,7 +1,8 @@
 import {
-  AfterLoad, BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn,
-  TableInheritance, UpdateDateColumn,
+  AfterLoad, BaseEntity, BeforeInsert, Column, CreateDateColumn, Entity, JoinColumn, OneToOne,
+  PrimaryGeneratedColumn, TableInheritance, UpdateDateColumn,
 } from "typeorm";
+import uuidv4 from "uuid/v4";
 
 import applyMixins from "../mixins/apply";
 import Propertiable from "../mixins/propertiable";
@@ -39,6 +40,11 @@ class HostingBackend extends BaseEntity {
   public parsedProperties: { [key: string]: any };
   public getProperty: (key: string) => any;
   public setProperty: (key: string, value: any) => void;
+
+  @BeforeInsert()
+  public setUuid() {
+    this.uuid = uuidv4();
+  }
 }
 
 applyMixins(HostingBackend, [Propertiable]);

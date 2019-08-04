@@ -94,6 +94,7 @@ export default function buildFactories() {
     .attr("name", () => faker.random.uuid())
     .attr("member", () => Factory.build<Member>("Member"))
     .attr("domainKey", () => faker.random.alphaNumeric(20))
+    .attr("certificate", () => Factory.build<Certificate>("Certificate"))
     .attr("createdAt", () => new Date())
     .attr("updatedAt", () => new Date())
     .after(async (obj) => {

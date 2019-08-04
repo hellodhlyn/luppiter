@@ -10,6 +10,8 @@ import { Permission } from "../../../src/models/auth/permission";
 import HostingInstance from "../../../src/models/hosting/instance";
 import CloudflareClient from "../../../src/libs/cloudflare";
 import { DNSRecord } from "../../../src/libs/cloudflare/responses";
+import { Certificate } from "../../../src/models/certs/certificate";
+import { StorageBucket } from "../../../src/models/storage/bucket";
 
 
 describe("vulcan hosting apis", () => {
@@ -17,6 +19,8 @@ describe("vulcan hosting apis", () => {
   let apiKey: ApiKey;
   let stranger: Member;
   let strangerKey: ApiKey;
+  let cert: Certificate;
+  let bucket: StorageBucket;
 
   before(async () => {
     member = await Factory.build<Member>("Member");
@@ -30,12 +34,15 @@ describe("vulcan hosting apis", () => {
       member: stranger,
       permissions: [await Permission.findOne({ key: "Hosting::*" })],
     });
+
+    cert = await Factory.build<Certificate>("Certificate", { member });
+    bucket = await Factory.build<StorageBucket>("StorageBucket", { member });
   });
 
   context("GET /vuclan/hosting/instances", () => {
     let instance: HostingInstance;
     before(async () => {
-      instance = await Factory.build<HostingInstance>("HostingInstance", { member });
+      instance = await Factory.build<HostingInstance>("HostingInstance", { certificate: cert, member });
     });
 
     it("success", (done) => {
@@ -55,7 +62,17 @@ describe("vulcan hosting apis", () => {
 
   context("POST /vuclan/hosting/instances", () => {
     const expectedName = faker.random.uuid();
+    let reqBody: {};
     let spy: sinon.SinonStub;
+
+    before(() => {
+      reqBody = {
+        name: expectedName,
+        certificateUuid: cert.uuid,
+        backendType: "storage",
+        backendProps: { bucketName: bucket.name },
+      };
+    });
 
     beforeEach(() => {
       spy = sinon.stub(CloudflareClient.prototype, "postZonesDnsRecord")
@@ -66,7 +83,7 @@ describe("vulcan hosting apis", () => {
     it("success", (done) => {
       mockRequest.post("/vulcan/hosting/instances")
         .set("X-Api-Key", apiKey.key)
-        .send({ name: expectedName })
+        .send(reqBody)
         .then(async (res) => {
           expect(res.status).to.equal(200);
           const instance = await HostingInstance.findOne({ name: expectedName });
@@ -80,7 +97,7 @@ describe("vulcan hosting apis", () => {
     it("failed for duplicated entry", (done) => {
       mockRequest.post("/vulcan/hosting/instances")
         .set("X-Api-Key", apiKey.key)
-        .send({ name: expectedName })
+        .send(reqBody)
         .then(async (res) => {
           expect(res.status).to.equal(400);
           expect(spy.notCalled).to.be.true;
@@ -100,7 +117,7 @@ describe("vulcan hosting apis", () => {
     };
 
     beforeEach(async () => {
-      instance = await Factory.build<HostingInstance>("HostingInstance", { member });
+      instance = await Factory.build<HostingInstance>("HostingInstance", { certificate: cert, member });
       listSpy = sinon.stub(CloudflareClient.prototype, "listZonesDnsRecords")
         .returns(new Promise((resolve) => resolve({ success: true, result: [dummyDns] })));
       deleteSpy = sinon.stub(CloudflareClient.prototype, "deleteZonesDnsRecord")

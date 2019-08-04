@@ -4,8 +4,14 @@ import HostingBackend from "../backend";
 
 @ChildEntity()
 export default class LuppiterStorageBackend extends HostingBackend {
-  private bucketNameKey = "bucketName";
-  private filePrefixKey = "filePrefix";
+  private bucketNameKey = "b";
+  private filePrefixKey = "p";
+  private redirectToIndexKey = "i";
+
+  constructor() {
+    super();
+    this.type = "storage";
+  }
 
   get bucketName(): string {
     return this.getProperty(this.bucketNameKey);
@@ -21,5 +27,13 @@ export default class LuppiterStorageBackend extends HostingBackend {
 
   set filePrefix(prefix: string) {
     this.setProperty(this.filePrefixKey, prefix);
+  }
+
+  get redirectToIndex(): boolean {
+    return this.getProperty(this.redirectToIndexKey);
+  }
+
+  set redirectToIndex(value: boolean) {
+    this.setProperty(this.redirectToIndexKey, value);
   }
 }

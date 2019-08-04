@@ -3,7 +3,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import uuidv4 from "uuid";
+import uuidv4 from "uuid/v4";
 
 import { DockerClient } from "../../libs/docker";
 import { Member } from "../auth/member";

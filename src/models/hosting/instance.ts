@@ -1,12 +1,13 @@
 import crypto from "crypto";
 import {
-  AfterInsert, BaseEntity, BeforeInsert, BeforeRemove, Column, CreateDateColumn, Entity, JoinColumn,
-  ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn,
+  BaseEntity, BeforeInsert, BeforeRemove, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne,
+  PrimaryGeneratedColumn, UpdateDateColumn,
 } from "typeorm";
 import uuidv4 from "uuid/v4";
 
 import CloudflareClient from "../../libs/cloudflare";
 import { Member } from "../auth/member";
+import { Certificate } from "../certs/certificate";
 
 @Entity({ name: "hosting_instances" })
 export default class HostingInstance extends BaseEntity {
@@ -26,6 +27,10 @@ export default class HostingInstance extends BaseEntity {
   // Domain: xxxxxxxxxxxxxxxxxxxx.luppiter.dev
   @Column({ name: "domain_key" })
   public domainKey: string;
+
+  @ManyToOne(() => Certificate)
+  @JoinColumn({ name: "certificate_id" })
+  public certificate: Certificate;
 
   @CreateDateColumn({ name: "created_at" })
   public createdAt: Date;
