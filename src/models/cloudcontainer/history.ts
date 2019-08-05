@@ -2,7 +2,7 @@ import {
   BaseEntity, BeforeInsert, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import uuidv4 from "uuid";
+import uuidv4 from "uuid/v4";
 
 import { CloudContainerTask } from "./task";
 
