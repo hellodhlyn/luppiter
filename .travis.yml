@@ -23,7 +23,7 @@ before_script:
 
 script:
   - yarn lint
-  - yarn test
+  - yarn test:all
 
 after_success:
   - yarn coverage
@@ -32,8 +32,10 @@ after_success:
   - if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
       docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
 
-      docker build -t lynlab/luppiter:latest .;
-      docker push lynlab/luppiter:latest;
+      if [ "${TRAVIS_BRANCH}" == "master" ]; then
+        docker build -t lynlab/luppiter:latest .;
+        docker push lynlab/luppiter:latest;
+      fi
 
       if [ -n "${TRAVIS_TAG}" ]; then
         docker build -t lynlab/luppiter:${TRAVIS_TAG} .;
