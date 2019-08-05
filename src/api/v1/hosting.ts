@@ -21,6 +21,7 @@ async function listInstances(req: Request, res: Response) {
 // Request Body:
 // {
 //   "name": "string"
+//   "domain": "string?",
 //   "certificateUuid": "string",
 //   "backendType": "storage",
 //   "backendProps": {}
@@ -40,6 +41,7 @@ async function createInstance(req: Request, res: Response) {
 
   const instance = new HostingInstance();
   instance.member = apiKey.member;
+  instance.domain = req.body.domain || null;
   instance.name = req.body.name;
   instance.certificate = cert;
   await instance.save();

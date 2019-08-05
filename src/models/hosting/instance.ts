@@ -24,6 +24,9 @@ export default class HostingInstance extends BaseEntity {
   @Column({ name: "name" })
   public name: string;
 
+  @Column({ name: "domain" })
+  public domain: string;
+
   // Domain: xxxxxxxxxxxxxxxxxxxx.luppiter.dev
   @Column({ name: "domain_key" })
   public domainKey: string;
@@ -68,7 +71,8 @@ export default class HostingInstance extends BaseEntity {
     return {
       name: this.name,
       uuid: this.uuid,
-      domain: `${this.domainKey}.luppiter.dev`,
+      domain: this.domain,
+      domainCname: `${this.domainKey}.luppiter.dev`,
       createdAt: this.createdAt.toISOString(),
     };
   }
