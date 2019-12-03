@@ -4,9 +4,9 @@ import faker from "faker";
 import { Factory } from "rosie";
 import { Response } from "superagent";
 import sinon from "sinon";
+import { getRepository } from "typeorm";
 
 import mockRequest from "../mock-request";
-import Repositories from "../../../src/models/repositories";
 import { Member } from "../../../src/models/auth/member";
 import { ApiKey } from "../../../src/models/auth/api_key";
 import { Permission } from "../../../src/models/auth/permission";
@@ -122,7 +122,7 @@ describe("vulcan auth apis", () => {
           expect(res.status).to.equal(200);
           expect(res.body.length).to.equal(2);
 
-          const repo = await Repositories.getRepository(ApiKey);
+          const repo = getRepository(ApiKey);
           apiKey = await repo.findOne({ where: { key: apiKey.key }, relations: ["permissions"] });
           expect(apiKey.permissions.length).to.equal(2);
           done();
@@ -149,7 +149,7 @@ describe("vulcan auth apis", () => {
         .then(async (res) => {
           expect(res.status).to.equal(200);
           
-          const repo = await Repositories.getRepository(ApiKey);
+          const repo = getRepository(ApiKey);
           apiKey = await repo.findOne({ where: { key: apiKey.key }, relations: ["permissions"] });
           expect(apiKey.permissions.length).to.equal(0);
           done();

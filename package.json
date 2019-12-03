@@ -70,6 +70,9 @@
     "include": [
       "src/**/*.ts"
     ],
+    "exclude": [
+      "src/migrations/*.ts"
+    ],
     "extension": [
       ".ts"
     ],

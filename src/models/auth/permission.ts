@@ -5,6 +5,23 @@ import {
 @Entity({ name: "permissions" })
 export class Permission extends BaseEntity {
 
+  public static async sync() {
+    for (const key of this.keys) {
+      if (await Permission.findOne({ key }) === null) {
+        const newPermission = new Permission();
+        newPermission.key = key;
+        await newPermission.save();
+      }
+    }
+  }
+
+  private static keys = [
+    "Storage::*", "Storage::Write", "Storage::Read",
+    "Hosting::*", "Hosting::Write", "Hosting::Read",
+    "Certs::*", "Certs::Write", "Certs::Read",
+    "CloudContainer::*", "CloudContainer::Write", "CloudContainer::Read",
+  ];
+
   @PrimaryGeneratedColumn()
   public id: number;
 
