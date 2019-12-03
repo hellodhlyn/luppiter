@@ -8,12 +8,12 @@ export = {
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
   username: process.env.DB_USERNAME || "postgres",
   password: process.env.DB_PASSWORD || "rootpass",
-  database: `${process.env.DB_NAME || "mighty"}${process.env.NODE_ENV === "test" ? "_test" : ""}`,
+  database: `${process.env.DB_NAME || "luppiter"}${process.env.NODE_ENV === "test" ? "_test" : ""}`,
 
   entities: [`${__dirname}/models/**/*{.ts,.js}`],
   migrations: [`${__dirname}/migrations/**/*{.ts,.js}`],
 
   namingStrategy: new SnakeNamingStrategy(),
-  synchronize: process.env.NODE_ENV === "test",
-  migrationsRun: process.env.NODE_ENV !== "test",
+  synchronize: false,
+  migrationsRun: true,
 } as ConnectionOptions;

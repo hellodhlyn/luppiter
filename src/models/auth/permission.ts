@@ -7,7 +7,7 @@ export class Permission extends BaseEntity {
 
   public static async sync() {
     for (const key of this.keys) {
-      if (await Permission.findOne({ key }) === null) {
+      if (!await Permission.findOne({ key })) {
         const newPermission = new Permission();
         newPermission.key = key;
         await newPermission.save();
