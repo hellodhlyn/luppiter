@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import faker from "faker";
 import { Factory } from "rosie";
+import { getRepository } from "typeorm";
 
 import { Member } from "../src/models/auth/member";
 import { ApiKey } from "../src/models/auth/api_key";
@@ -9,7 +10,6 @@ import { CloudContainerTask } from "../src/models/cloudcontainer/task";
 import { CloudContainerHistory } from "../src/models/cloudcontainer/history";
 import { Permission } from "../src/models/auth/permission";
 import { StorageBucket } from "../src/models/storage/bucket";
-import Repositories from "../src/models/repositories";
 import HostingInstance from "../src/models/hosting/instance";
 
 export default function buildFactories() {
@@ -20,7 +20,7 @@ export default function buildFactories() {
     .attr("createdAt", () => new Date())
     .attr("updatedAt", () => new Date())
     .after(async (member) => {
-      return Repositories.getRepository(Member).then((repo) => repo.save(member));
+      return getRepository(Member).save(member);
     });
 
   Factory.define<ApiKey>("ApiKey")
@@ -32,7 +32,7 @@ export default function buildFactories() {
     .attr("createdAt", () => new Date())
     .attr("updatedAt", () => new Date())
     .after(async (key) => {
-      return Repositories.getRepository(ApiKey).then((repo) => repo.save(key));
+      return getRepository(ApiKey).save(key);
     });
 
   Factory.define<Permission>("Permission")
@@ -41,7 +41,7 @@ export default function buildFactories() {
     .attr("createdAt", () => new Date())
     .attr("updatedAt", () => new Date())
     .after(async (permission) => {
-      return Repositories.getRepository(Permission).then((repo) => repo.save(permission));
+      return getRepository(Permission).save(permission);
     });
 
   // Certs models
@@ -56,7 +56,7 @@ export default function buildFactories() {
     .attr("createdAt", () => new Date())
     .attr("updatedAt", () => new Date())
     .after(async (obj) => {
-      return Repositories.getRepository(Certificate).then((repo) => repo.save(obj));
+      return getRepository(Certificate).save(obj);
     });
 
   // CloudContainer models
@@ -71,7 +71,7 @@ export default function buildFactories() {
     .attr("createdAt", () => new Date())
     .attr("updatedAt", () => new Date())
     .after(async (obj) => {
-      return Repositories.getRepository(CloudContainerTask).then((repo) => repo.save(obj));
+      return getRepository(CloudContainerTask).save(obj);
     });
 
   Factory.define<CloudContainerHistory>("CloudContainerHistory")
@@ -84,7 +84,7 @@ export default function buildFactories() {
     .attr("createdAt", () => new Date())
     .attr("updatedAt", () => new Date())
     .after(async (obj) => {
-      return Repositories.getRepository(CloudContainerTask).then((repo) => repo.save(obj));
+      return getRepository(CloudContainerTask).save(obj);
     });
 
   // Hosting models
@@ -98,7 +98,7 @@ export default function buildFactories() {
     .attr("createdAt", () => new Date())
     .attr("updatedAt", () => new Date())
     .after(async (obj) => {
-      return Repositories.getRepository(HostingInstance).then((repo) => repo.save(obj));
+      return getRepository(HostingInstance).save(obj);
     });
 
   // Storage models
@@ -110,6 +110,6 @@ export default function buildFactories() {
     .attr("createdAt", () => new Date())
     .attr("updatedAt", () => new Date())
     .after(async (bucket) => {
-      return Repositories.getRepository(StorageBucket).then((repo) => repo.save(bucket));
+      return getRepository(StorageBucket).save(bucket);
     });
 }

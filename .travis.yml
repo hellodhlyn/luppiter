@@ -3,7 +3,7 @@ node_js:
   - '10'
 
 env:
-  - TYPEORM_CONNECTION=postgres TYPEORM_HOST=127.0.0.1 TYPEORM_PORT=5432 TYPEORM_USERNAME=postgres TYPEORM_DATABASE=luppiter_test TYPEORM_ENTITIES=dist/models/**/*.js TYPEORM_MIGRATIONS=dist/migration/*.js
+  - NODE_ENV=test
 
 services:
   - postgresql
@@ -18,8 +18,7 @@ before_script:
   - yarn build
 
   - psql -c 'create database luppiter_test;' -U postgres
-  - yarn typeorm migration:run
-  - yarn seed
+  - yarn typeorm:run
 
 script:
   - yarn lint

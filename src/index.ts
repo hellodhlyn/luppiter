@@ -1,17 +1,15 @@
-// Load environment variables from .env file.
-import dotenv from "dotenv";
-
-dotenv.config();
-
 import * as grpc from "grpc";
 import { createConnection } from "typeorm";
 
 import app from "./app";
 import CertificateGrpcService from "./grpc/certificate";
+import { Permission } from "./models/auth/permission";
+import ormconfig from "./ormconfig";
 
 async function startServer() {
   // Establish database connection.
-  await createConnection();
+  await createConnection(ormconfig);
+  await Permission.sync();
 
   // Start web server.
   const port = process.env.PORT || 8080;
