@@ -11,7 +11,7 @@ export = {
   database: `${process.env.DB_NAME || "luppiter"}${process.env.NODE_ENV === "test" ? "_test" : ""}`,
 
   entities: [`${__dirname}/models/**/*{.ts,.js}`],
-  migrations: [`${__dirname}/migrations/**/*{.ts,.js}`],
+  migrations: [`${__dirname}/../migrations/**/*{.ts,.js}`],
 
   namingStrategy: new SnakeNamingStrategy(),
   synchronize: false,

@@ -1,11 +1,12 @@
-import * as protoLoader from "@grpc/proto-loader";
-import * as grpc from "grpc";
-import CloudflareClient from "../libs/cloudflare";
-import { Certificate } from "../models/certs/certificate";
-import { CertificateProvision } from "../models/certs/certificate-provision";
+import * as protoLoader from '@grpc/proto-loader';
+import * as grpc from 'grpc';
+import CloudflareClient from '../libs/cloudflare';
+import { Certificate } from '../models/certs/certificate';
+import { CertificateProvision } from '../models/certs/certificate-provision';
 
 export default class CertificateGrpcService {
-  private protoPath = __dirname + "../../../protos/certificate.proto";
+  private protoPath = `${__dirname}../../../protos/certificate.proto`;
+
   private server: grpc.Server;
 
   public getServer() {
@@ -39,7 +40,7 @@ export default class CertificateGrpcService {
       return;
     }
 
-    cert.state = "initializing";
+    cert.state = 'initializing';
     await cert.save();
 
     callback(null, { email: cert.email });
@@ -53,7 +54,7 @@ export default class CertificateGrpcService {
       return;
     }
 
-    cert.state = "verifying";
+    cert.state = 'verifying';
     await cert.save();
 
     callback(null, { domains: cert.domains, dnsToken: cert.dnsToken });
@@ -72,7 +73,7 @@ export default class CertificateGrpcService {
     const cf = CloudflareClient.getInstance(cfToken);
     records.forEach(async (record: string) => {
       await cf.postZonesDnsRecord(cfZoneId, {
-        type: "TXT",
+        type: 'TXT',
         name: `${cert.dnsToken}.luppiter.dev`,
         content: record,
       });
@@ -82,14 +83,16 @@ export default class CertificateGrpcService {
   }
 
   private async verifiedCallback(call: any, callback: any) {
-    const { uuid, csr, privKey, certificate } = call.request;
-    const cert = await Certificate.findOne({ where: { uuid }, relations: ["provisions"] });
+    const {
+      uuid, csr, privKey, certificate,
+    } = call.request;
+    const cert = await Certificate.findOne({ where: { uuid }, relations: ['provisions'] });
     if (!cert) {
       callback(Error(`no such certificate: ${uuid}`));
       return;
     }
 
-    cert.state = "issued";
+    cert.state = 'issued';
     await cert.save();
 
     const provision = new CertificateProvision();
