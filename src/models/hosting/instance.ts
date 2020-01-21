@@ -5,12 +5,14 @@ import {
 } from "typeorm";
 import uuidv4 from "uuid/v4";
 
-import CloudflareClient from "../../libs/cloudflare";
+import { CloudflareClient } from "../../libs/cloudflare";
 import { Member } from "../auth/member";
 import { Certificate } from "../certs/certificate";
 
 @Entity({ name: "hosting_instances" })
 export default class HostingInstance extends BaseEntity {
+  private static cfClient = new CloudflareClient(process.env.CLOUDFLARE_API_TOKEN);
+
   @PrimaryGeneratedColumn()
   public id: number;
 
@@ -49,9 +51,8 @@ export default class HostingInstance extends BaseEntity {
 
   @BeforeInsert()
   public async deployDns() {
-    const cfToken = process.env.CLOUDFLARE_API_TOKEN;
     const cfZoneId = process.env.CLOUDFLARE_ZONE_ID;
-    await CloudflareClient.getInstance(cfToken).postZonesDnsRecord(cfZoneId, {
+    await HostingInstance.cfClient.postZonesDnsRecord(cfZoneId, {
       type: "CNAME",
       name: `${this.domainKey}.luppiter.dev`,
       content: "hosting.luppiter.dev",
@@ -60,11 +61,10 @@ export default class HostingInstance extends BaseEntity {
 
   @BeforeRemove()
   public async clearDns() {
-    const cfToken = process.env.CLOUDFLARE_API_TOKEN;
     const cfZoneId = process.env.CLOUDFLARE_ZONE_ID;
     const name = `${this.domainKey}.luppiter.dev`;
-    const res = await CloudflareClient.getInstance(cfToken).listZonesDnsRecords(cfZoneId, { name });
-    await CloudflareClient.getInstance(cfToken).deleteZonesDnsRecord(cfZoneId, res.result[0].id);
+    const res = await HostingInstance.cfClient.listZonesDnsRecords(cfZoneId, { name });
+    await HostingInstance.cfClient.deleteZonesDnsRecord(cfZoneId, res.result[0].id);
   }
 
   public toJson(): object {

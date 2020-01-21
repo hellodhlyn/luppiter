@@ -4,7 +4,7 @@ import S3 from "aws-sdk/clients/s3";
 import sinon from "sinon";
 
 import { StorageBucket } from "../../../src/models/storage/bucket";
-import S3Client from "../../../src/libs/s3";
+import { S3Client } from "../../../src/libs/aws-s3";
 
 describe("StorageBucket", () => {
 

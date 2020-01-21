@@ -1,6 +1,6 @@
 import S3 from 'aws-sdk/clients/s3';
 
-export default class S3Client {
+export class S3Client {
   private s3: S3;
 
   private bucketName: string;

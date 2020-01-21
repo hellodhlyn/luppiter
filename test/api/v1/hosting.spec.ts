@@ -8,8 +8,7 @@ import { Member } from "../../../src/models/auth/member";
 import { ApiKey } from "../../../src/models/auth/api_key";
 import { Permission } from "../../../src/models/auth/permission";
 import HostingInstance from "../../../src/models/hosting/instance";
-import CloudflareClient from "../../../src/libs/cloudflare";
-import { DNSRecord } from "../../../src/libs/cloudflare/responses";
+import { CloudflareClient } from "../../../src/libs/cloudflare";
 import { Certificate } from "../../../src/models/certs/certificate";
 import { StorageBucket } from "../../../src/models/storage/bucket";
 
@@ -111,7 +110,7 @@ describe("vulcan hosting apis", () => {
     let instance: HostingInstance;
     let listSpy: sinon.SinonStub;
     let deleteSpy: sinon.SinonStub;
-    const dummyDns: DNSRecord = {
+    const dummyDns = {
       id: "dummy", type: "A", name: "dummy", content: "dummy.com", proxiable: false, proxied: false, ttl: 1,
       locked: false, zone_id: "dummy", zone_name: "dummy", created_on: "dummy", modified_on: "dummy", data: {},
     };

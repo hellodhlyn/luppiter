@@ -3,7 +3,7 @@ import fs from "fs";
 import {
   BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn,
 } from "typeorm";
-import S3Client from "../../libs/s3";
+import { S3Client } from "../../libs/aws-s3";
 import { Member } from "../auth/member";
 
 @Entity({ name: "storage_buckets" })

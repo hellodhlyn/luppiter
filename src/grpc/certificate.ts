@@ -1,10 +1,13 @@
 import * as protoLoader from '@grpc/proto-loader';
 import * as grpc from 'grpc';
-import CloudflareClient from '../libs/cloudflare';
+
+import { CloudflareClient } from '../libs/cloudflare';
 import { Certificate } from '../models/certs/certificate';
 import { CertificateProvision } from '../models/certs/certificate-provision';
 
 export default class CertificateGrpcService {
+  private static cfClient = new CloudflareClient(process.env.CLOUDFLARE_API_TOKEN);
+
   private protoPath = `${__dirname}../../../protos/certificate.proto`;
 
   private server: grpc.Server;
@@ -22,17 +25,17 @@ export default class CertificateGrpcService {
 
       this.server = new grpc.Server();
       this.server.addService(certificate.Certificate.service, {
-        registerClient: this.registerClient,
-        fetchDomains: this.fetchDomains,
-        registerChallenges: this.registerChallenges,
-        verifiedCallback: this.verifiedCallback,
+        registerClient: CertificateGrpcService.registerClient,
+        fetchDomains: CertificateGrpcService.fetchDomains,
+        registerChallenges: CertificateGrpcService.registerChallenges,
+        verifiedCallback: CertificateGrpcService.verifiedCallback,
       });
     }
 
     return this.server;
   }
 
-  private async registerClient(call: any, callback: any) {
+  private static async registerClient(call: any, callback: any) {
     const { uuid } = call.request;
     const cert = await Certificate.findOne({ uuid });
     if (!cert) {
@@ -46,7 +49,7 @@ export default class CertificateGrpcService {
     callback(null, { email: cert.email });
   }
 
-  private async fetchDomains(call: any, callback: any) {
+  private static async fetchDomains(call: any, callback: any) {
     const { uuid } = call.request;
     const cert = await Certificate.findOne({ uuid });
     if (!cert) {
@@ -60,7 +63,7 @@ export default class CertificateGrpcService {
     callback(null, { domains: cert.domains, dnsToken: cert.dnsToken });
   }
 
-  private async registerChallenges(call: any, callback: any) {
+  private static async registerChallenges(call: any, callback: any) {
     const { uuid, records } = call.request;
     const cert = await Certificate.findOne({ uuid });
     if (!cert) {
@@ -68,21 +71,17 @@ export default class CertificateGrpcService {
       return;
     }
 
-    const cfToken = process.env.CLOUDFLARE_API_TOKEN;
-    const cfZoneId = process.env.CLOUDFLARE_ZONE_ID;
-    const cf = CloudflareClient.getInstance(cfToken);
-    records.forEach(async (record: string) => {
-      await cf.postZonesDnsRecord(cfZoneId, {
-        type: 'TXT',
-        name: `${cert.dnsToken}.luppiter.dev`,
-        content: record,
-      });
-    });
+    const zoneId = process.env.CLOUDFLARE_ZONE_ID;
+    await Promise.all(records.map((record: string) => this.cfClient.postZonesDnsRecord(zoneId, {
+      type: 'TXT',
+      name: `${cert.dnsToken}.luppiter.dev`,
+      content: record,
+    })));
 
     callback(null, {});
   }
 
-  private async verifiedCallback(call: any, callback: any) {
+  private static async verifiedCallback(call: any, callback: any) {
     const {
       uuid, csr, privKey, certificate,
     } = call.request;
@@ -105,13 +104,11 @@ export default class CertificateGrpcService {
     await provision.save();
 
     // Clean Up dns records.
-    const cfToken = process.env.CLOUDFLARE_API_TOKEN;
     const cfZoneId = process.env.CLOUDFLARE_ZONE_ID;
-    const cf = CloudflareClient.getInstance(cfToken);
-    const records = await cf.listZonesDnsRecords(cfZoneId, { name: `${cert.dnsToken}.luppiter.dev` });
-    records.result.forEach(async (result) => {
-      await cf.deleteZonesDnsRecord(cfZoneId, result.id);
-    });
+    const records = await this.cfClient.listZonesDnsRecords(cfZoneId, { name: `${cert.dnsToken}.luppiter.dev` });
+    await Promise.all(
+      records.result.map((result) => this.cfClient.deleteZonesDnsRecord(cfZoneId, result.id)),
+    );
 
     callback(null, {});
   }
