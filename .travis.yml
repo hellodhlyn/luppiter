@@ -18,7 +18,7 @@ before_script:
   - yarn build
 
   - psql -c 'create database luppiter_test;' -U postgres
-  - yarn typeorm:run
+  - yarn typeorm:migrate
 
 script:
   - yarn lint
