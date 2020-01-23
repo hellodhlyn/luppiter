@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { UploadedFile } from 'express-fileupload';
 import expressContext from 'express-http-context';
 import fileType from 'file-type';
+import mime from 'mime-types';
 
 import { ApiKey } from '../models/auth/api_key';
 import { StorageBucket } from '../models/storage/bucket';
@@ -22,8 +23,8 @@ async function readFile(req: Request, res: Response) {
     return;
   }
 
-  const type = fileType(fileBody);
-  res.header('Content-Type', type ? type.mime : 'application/text').send(fileBody);
+  const contentType = fileType(fileBody)?.mime || mime.lookup(key) || 'application/text';
+  res.header('Content-Type', contentType).send(fileBody);
 }
 
 async function writeFile(req: Request, res: Response) {
