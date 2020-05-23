@@ -1,13 +1,8 @@
 export DB_HOST=127.0.0.1
 export DB_PORT=5432
 export DB_USERNAME=postgres
-export DB_PASSWORD=<set your password>
+export DB_PASSWORD=
 export DB_NAME=luppiter
 
-export LUPPITER_STORAGE_CACHE_PATH=~/.cache/Luppiter
-
-export CLOUDFLARE_API_TOKEN=<your token>
-export CLOUDFLARE_ZONE_ID=<your zone id>
-
-export DOCKER_REMOTE_HOST=127.0.0.1
-export DOCKER_REMOTE_PORT=2375
+export GOOGLE_CLIENT_ID=
+export GOOGLE_SECRET_ACCOUNT_PATH=$PWD/secret/service_account.json
