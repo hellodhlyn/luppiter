@@ -30,6 +30,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	appRepo, err := repository.NewApplicationRepository(db)
+	if err != nil {
+		panic(err)
+	}
 
 	accountSvc, err := service.NewUserAccountService(accountRepo, identityRepo)
 	if err != nil {
@@ -39,10 +43,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	appSvc, err := service.NewApplicationService(appRepo)
+	if err != nil {
+		panic(err)
+	}
 
+	appCtrl, _ := vulcan.NewApplicationsController(appSvc)
 	authCtrl, _ := vulcan.NewAuthController(accountSvc, tokenSvc)
 
 	router := httprouter.New()
+	router.GET("/vulcan/applications/:uuid", appCtrl.Get)
 	router.POST("/vulcan/auth/signin/google", authCtrl.AuthByGoogle)
 
 	fmt.Println("Start and listening 0.0.0.0:8080")

@@ -27,9 +27,9 @@ type PostAccountBody struct {
 }
 
 type AccessTokenBody struct {
-	AccessKey string     `json:"access_key"`
-	SecretKey string     `json:"secret_key"`
-	ExpireAt  *time.Time `json:"expire_at"`
+	AccessKey string     `json:"accessKey"`
+	SecretKey string     `json:"secretKey"`
+	ExpireAt  *time.Time `json:"expireAt"`
 }
 
 // POST /vulcan/auth/signin/google
