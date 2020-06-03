@@ -2,8 +2,9 @@ package model
 
 type Application struct {
 	ModelMixin
-	UUID    string
-	Name    string
-	OwnerID int
-	Owner   UserIdentity
+	UUID      string
+	Name      string
+	OwnerID   int
+	Owner     UserIdentity
+	SecretKey string
 }

@@ -1,10 +1,10 @@
 package vulcan
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
+	"github.com/hellodhlyn/luppiter/controller"
 	"github.com/hellodhlyn/luppiter/service"
 	"github.com/julienschmidt/httprouter"
 )
@@ -31,10 +31,9 @@ type ApplicationBody struct {
 func (ctrl *ApplicationsControllerImpl) Get(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	app := ctrl.svc.FindByUUID(p.ByName("uuid"))
 
-	var resBody *ApplicationBody = nil
+	var resBody *ApplicationBody
 	if app != nil {
 		resBody = &ApplicationBody{UUID: app.UUID, Name: app.Name, CreatedAt: app.CreatedAt}
 	}
-	w.Header().Set("Content-Type", "application/json; encode=utf-8")
-	_ = json.NewEncoder(w).Encode(resBody)
+	controller.JsonResponse(w, resBody)
 }

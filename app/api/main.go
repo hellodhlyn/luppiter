@@ -49,11 +49,12 @@ func main() {
 	}
 
 	appCtrl, _ := vulcan.NewApplicationsController(appSvc)
-	authCtrl, _ := vulcan.NewAuthController(accountSvc, tokenSvc)
+	authCtrl, _ := vulcan.NewAuthController(accountSvc, appSvc, tokenSvc)
 
 	router := httprouter.New()
 	router.GET("/vulcan/applications/:uuid", appCtrl.Get)
 	router.POST("/vulcan/auth/signin/google", authCtrl.AuthByGoogle)
+	router.POST("/vulcan/auth/activate", authCtrl.ActivateAccessToken)
 
 	fmt.Println("Start and listening 0.0.0.0:8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
