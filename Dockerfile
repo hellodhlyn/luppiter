@@ -1,15 +1,22 @@
-FROM node:dubnium-slim
+### Builder
+FROM golang:1.14-alpine as builder
+RUN apk update && apk add git && apk add ca-certificates
 
 WORKDIR /usr/src/app
-RUN npm install yarn
-
-COPY package.json .
-COPY yarn.lock .
-RUN yarn
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
 
 COPY . .
-RUN yarn build
-RUN yarn --production
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags '-s' -o dist/api ./app/api
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags '-s' -o dist/migrate ./app/migrate
 
-EXPOSE 8080
-CMD ["node", "."]
+
+### Make executable image
+FROM scratch
+
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /usr/src/app/dist /
+
+CMD [ "/api" ]

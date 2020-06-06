@@ -1,36 +1,27 @@
-[![Travis CI](https://img.shields.io/travis/lynlab/luppiter.svg?style=flat-square)](https://travis-ci.org/lynlab/luppiter)
-[![Codecov](https://img.shields.io/codecov/c/gh/lynlab/luppiter.svg?style=flat-square)](https://codecov.io/gh/lynlab/luppiter)
+# Luppiter
 
-# LYnLab Luppiter
-
-> Restful APIs for LYnLab Luppiter services.  
-> For further information, see documentations on [LYnLab Luppiter console](https://luppiter.lynlab.co.kr/web).
+> Restful APIs for Luppiter services.
+> For details, see documentations on [Luppiter Console](https://console.luppiter.dev).
 
 ## Development
 
-### Prerequisited
+### Prerequisites
 
-- nodejs
-- yarn (recommended)
-- docker-compose
+- Go 1.14 (or greater)
+- Docker Compose
 
 ### Start Database
 
 ```sh
 # Start database
-(cd ./compose/local; docker-compose up -d)
-
-# Set environments
-cp .env.example .env
-vi .env  # set your own configurations
+docker-compose -f compose/local/docker-compose.yaml up -d
 
 # Run migration
-yarn
-yarn typeorm run:migration
+go run ./app/migrate up
 ```
 
 ### Run Server
 
 ```sh
-yarn start
+go run ./app/api
 ```
