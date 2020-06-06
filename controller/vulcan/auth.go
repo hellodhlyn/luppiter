@@ -13,20 +13,29 @@ import (
 type AuthController interface {
 	AuthByGoogle(http.ResponseWriter, *http.Request, httprouter.Params)
 	ActivateAccessToken(http.ResponseWriter, *http.Request, httprouter.Params)
+	GetMe(http.ResponseWriter, *http.Request, httprouter.Params)
 }
 
 type AuthControllerImpl struct {
 	accountSvc service.UserAccountService
 	appSvc     service.ApplicationService
 	tokenSvc   service.AccessTokenService
+	authSvc    service.AuthenticationService
 }
 
 func NewAuthController(
 	accountSvc service.UserAccountService,
 	appSvc service.ApplicationService,
 	tokenSvc service.AccessTokenService,
+	authSvc service.AuthenticationService,
 ) (AuthController, error) {
-	return &AuthControllerImpl{accountSvc, appSvc, tokenSvc}, nil
+	return &AuthControllerImpl{accountSvc, appSvc, tokenSvc, authSvc}, nil
+}
+
+type MeResBody struct {
+	UUID     string `json:"uuid"`
+	Email    string `json:"email"`
+	Username string `json:"username"`
 }
 
 type SignInReqBody struct {
@@ -46,6 +55,16 @@ type ActivateResBody struct {
 	AccessKey string     `json:"accessKey"`
 	SecretKey string     `json:"secretKey"`
 	ExpireAt  *time.Time `json:"expireAt"`
+}
+
+// GET /vulcan/auth/me
+func (ctrl *AuthControllerImpl) GetMe(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	user, err := ctrl.authSvc.Authenticate(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+	controller.JsonResponse(w, &MeResBody{UUID: user.UUID, Email: user.Email, Username: user.Username})
 }
 
 // POST /vulcan/auth/signin/google

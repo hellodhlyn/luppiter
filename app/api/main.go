@@ -47,12 +47,17 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	authSvc, err := service.NewAuthenticationService(tokenRepo)
+	if err != nil {
+		panic(err)
+	}
 
 	appCtrl, _ := vulcan.NewApplicationsController(appSvc)
-	authCtrl, _ := vulcan.NewAuthController(accountSvc, appSvc, tokenSvc)
+	authCtrl, _ := vulcan.NewAuthController(accountSvc, appSvc, tokenSvc, authSvc)
 
 	router := httprouter.New()
 	router.GET("/vulcan/applications/:uuid", appCtrl.Get)
+	router.GET("/vulcan/auth/me", authCtrl.GetMe)
 	router.POST("/vulcan/auth/signin/google", authCtrl.AuthByGoogle)
 	router.POST("/vulcan/auth/activate", authCtrl.ActivateAccessToken)
 
