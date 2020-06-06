@@ -30,3 +30,5 @@
 
 .envrc
 secret/
+
+Dockerfile
