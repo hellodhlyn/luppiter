@@ -1,8 +1,0 @@
-export DB_HOST=127.0.0.1
-export DB_PORT=5432
-export DB_USERNAME=postgres
-export DB_PASSWORD=
-export DB_NAME=luppiter
-
-export GOOGLE_CLIENT_ID=
-export GOOGLE_SECRET_ACCOUNT_PATH=$PWD/secret/service_account.json
